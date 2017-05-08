@@ -1,7 +1,11 @@
+#!/usr/bin/php
 <?php
 
 $marc = [];
+$i = 0;
+$id = 0;
 
+include 'inc/config.php';
 include 'inc/functions.php';
 
 
@@ -14,18 +18,15 @@ while( $line = fgets(STDIN) ) {
 
 /* Processa os fixes */
 
-if (isset($marc)){
-	$body = fixes($marc); 
+if (!empty($marc)){
+	print_r($marc);
+	$body = fixes($marc);
+	print_r($body); 
 }
 
-
-echo "\n";
-if (!empty($body)){
-	print_r($body);
-} else {
+if ($body["naoIndexar"] == true ){
 	echo "Registro não é da base 03 ou 04";
-}	
-echo "\n\n";
-
-
-?>
+} else {
+	$response = elasticsearch::elastic_update($id,$type,$body);
+	print_r($response);	
+}
