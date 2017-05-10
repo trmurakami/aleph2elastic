@@ -4,3 +4,4 @@ a2e1
 composer.lock
 composer.phar
 vendor/
+data/
