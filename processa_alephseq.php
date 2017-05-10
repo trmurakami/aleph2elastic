@@ -25,8 +25,8 @@ if (!empty($marc)){
 }
 
 if ($body["naoIndexar"] == true ){
-	echo "Registro não é da base 03 ou 04";
+	//echo "Registro não é da base 03 ou 04";
 } else {
 	$response = elasticsearch::elastic_update($id,$type,$body);
-	print_r($response);	
+	//print_r($response);	
 }
