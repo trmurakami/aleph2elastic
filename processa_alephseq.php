@@ -19,9 +19,9 @@ while( $line = fgets(STDIN) ) {
 /* Processa os fixes */
 
 if (!empty($marc)){
-	print_r($marc);
+	//print_r($marc);
 	$body = fixes($marc);
-	print_r($body); 
+	//print_r($body); 
 }
 
 if ($body["naoIndexar"] == true ){

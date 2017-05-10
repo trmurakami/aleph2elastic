@@ -18,7 +18,7 @@ function processaAlephseq($line) {
 
 	
 	$control_fields = array("LDR","FMT","001","008");
-	$repetitive_fields = array("100","650","700","856","946","CAT");
+	$repetitive_fields = array("100","650","700","856","946","952","CAT");
 	
 	if (in_array($field,$control_fields)) {
 		$marc["record"][$field]["content"] = trim(substr($line, 18));			
@@ -49,8 +49,7 @@ function processaAlephseq($line) {
 	//$marc["record"][$field]["ind_2"] = $ind_2;
 	
 	$i++;
-	
-	
+
 }
 
 /*
@@ -60,7 +59,7 @@ function fixes($marc) {
 	
 	global $i;
 
-	print_r($marc);
+	//print_r($marc);
 	$body = [];
 		
 	if ($marc["record"]["BAS"]["a"][0] == 01){
@@ -77,12 +76,14 @@ function fixes($marc) {
 
 	if (isset($marc)) {	
 		if ($marc["record"]["BAS"]["a"][0] == 03){
+			$body["naoIndexar"] = false;
 			$body["doc"]["base"][] = "Teses e dissertações";
 		}
 	}
 	
 	if (isset($marc)) {	
 		if ($marc["record"]["BAS"]["a"][0] == 04){
+			$body["naoIndexar"] = false;
 			$body["doc"]["base"][] = "Produção científica";
 		}
 	}
@@ -109,6 +110,10 @@ function fixes($marc) {
 	
 		foreach (($marc["record"]["100"]) as $person) { 
 			$author["person"]["name"] = $person["a"];
+			if (!empty($person["4"])) {
+				$potentialAction_correct = decode::potentialAction($person["4"]);
+				$author["person"]["potentialAction"] = $potentialAction_correct;
+			}			
 			if (!empty($person["8"])) {
 				$author["person"]["affiliation"]["name"] = $person["8"];
 			}
@@ -127,9 +132,47 @@ function fixes($marc) {
 	}
 	
 	if (isset($marc["record"]["260"])) {
-		$body["doc"]["publisher"]["organization"]["name"] = $marc["record"]["260"]["b"][0];
+		if (isset($marc["record"]["260"]["b"])){
+			$body["doc"]["publisher"]["organization"]["name"] = $marc["record"]["260"]["b"][0];
+		}	
 		$body["doc"]["publisher"]["organization"]["location"] = $marc["record"]["260"]["a"][0]; 
 	}
+	
+
+	if (isset($marc["record"]["502"])) {
+		$body["doc"]["inSupportOf"] = $marc["record"]["502"]["a"][0]; 
+	}
+	
+	if (isset($marc["record"]["520"])) {
+		foreach (($marc["record"]["520"]["a"]) as $description) {
+			$body["doc"]["description"][] = $description;
+		} 
+	}	
+	
+	if (isset($marc["record"]["536"])) {
+		foreach (($marc["record"]["536"]) as $funder) {
+			$body["doc"]["funder"][] = $funder["a"];
+		} 
+	}	
+	
+	if (isset($marc["record"]["590"])) {
+		if (!empty($marc["record"]["590"]["d"])){
+			$body["doc"]["USP"]["areaconcentracao"] = $marc["record"]["590"]["d"][0];
+		}
+		if (!empty($marc["record"]["590"]["m"])){
+			$body["doc"]["USP"]["fatorimpacto"] = $marc["record"]["590"]["m"][0];
+		}
+		if (!empty($marc["record"]["590"]["n"])){
+			$body["doc"]["USP"]["grupopesquisa"] = explode(";", $marc["record"]["590"]["n"][0]);
+		}					
+
+	}
+	
+	if (isset($marc["record"]["599"])) {
+		$body["doc"]["USP"]["programa_pos_sigla"] = $marc["record"]["599"]["a"][0];
+		$body["doc"]["USP"]["programa_pos_nome"] = $marc["record"]["599"]["b"][0]; 
+	}	
+	
 	
 	if (isset($marc["record"]["650"])) {
 		foreach (($marc["record"]["650"]) as $subject) {
@@ -146,7 +189,11 @@ function fixes($marc) {
 			}
 			if (!empty($person["9"])) {
 				$author["person"]["affiliation"]["location"] = $person["9"];
-			}	
+			}
+			if (!empty($person["4"])) {
+				$potentialAction_correct = decode::potentialAction($person["4"]);
+				$author["person"]["potentialAction"] = $potentialAction_correct;
+			}				
 			$body["doc"]["author"][] = $author;
 			unset($person);
 			unset($author);			
@@ -165,23 +212,32 @@ function fixes($marc) {
 	if (isset($marc["record"]["856"])) {
 	
 		foreach ($marc["record"]["856"] as $url) {
-			if ($url["3"] == "Documento completo") {
+			if ($url["3"] == "Documento completo" | $url["3"] == "BDTD") {
 				$body["doc"]["url"][] = $url["u"];
-			}			
+			}					
 		} 	
 
 
 	}			
 	
 	if (isset($marc["record"]["945"])) {
-		$body["doc"]["datePublished"] = $marc["record"]["945"]["j"][0];
+		if (isset($marc["record"]["945"]["j"])){
+			$body["doc"]["datePublished"] = $marc["record"]["945"]["j"][0];
+		}		
 		$body["doc"]["type"] = $marc["record"]["945"]["b"][0];
-		$body["doc"]["USP"]["internacionalizacao"] = $marc["record"]["945"]["l"][0];
+		
+		if (isset($marc["record"]["945"]["l"])){
+			$body["doc"]["USP"]["internacionalizacao"] = $marc["record"]["945"]["l"][0];
+		}
+		
 		
 		switch ($marc["record"]["945"]["b"][0]) {
 		    case "MONOGRAFIA/LIVRO":
 			$body["doc"]["numberOfPages"] = $marc["record"]["300"]["a"][0];
 		    break;
+		    case "TESE":
+			$body["doc"]["dateCreated"] = $marc["record"]["945"]["i"][0];
+		    break;		    
 		}		
 		
 		
@@ -193,12 +249,38 @@ function fixes($marc) {
 		foreach (($marc["record"]["946"]) as $authorUSP) {
 			$authorUSP_array["name"] = $authorUSP["a"];
 			$authorUSP_array["unidadeUSP"] = $authorUSP["e"];
-			$authorUSP_array["departament"] = $authorUSP["g"];
+			
+			if (isset($authorUSP["g"])) {
+				$authorUSP_array["departament"] = $authorUSP["g"];
+			}	
 			$body["doc"]["authorUSP"][] = $authorUSP_array;
 			$body["doc"]["unidadeUSP"][] = $authorUSP["e"];	
 		}
 
 	}
+	
+	if (isset($marc["record"]["952"])) {
+		foreach ($marc["record"]["952"] as $subject_BDTD) {			
+			if (isset($subject_BDTD["f"])) {
+				$body["doc"]["USP"]["about_BDTD"][] = $subject_BDTD["a"];
+			}	
+		}
+	}
+	
+	if (isset($marc["record"]["CAT"])) {
+		foreach ($marc["record"]["CAT"] as $CAT) {
+			if (isset ($CAT["a"])){
+				$CAT_array["cataloger"] = $CAT["a"];
+			} else {
+				$CAT_array["cataloger"] = "N/A";
+			} 	
+			$CAT_array["date"] = substr($CAT["c"], 0, -2);
+			$body["doc"]["USP"]["CAT"][] = $CAT_array;
+		}
+		unset($CAT);
+		unset($CAT_array); 	
+		
+	}		
 	
 	
 	
@@ -247,7 +329,9 @@ class decode {
 		    break;
 		    case "eng":
 			return "Inglês";
-		    break;		    
+		    break;
+		    default:
+		    	return $language;		    		    
 		}
 	}
 	
@@ -259,9 +343,22 @@ class decode {
 		    break;
 		    case "xxu":
 			return "Estados Unidos";
-		    break;		    
+		    break;
+		    default:
+		    	return $country;		    		    
 		}
 	}
+	
+	/* Decodificar função */
+	static function potentialAction($potentialAction){
+		switch ($potentialAction) {
+		    case "orient":
+			return "Orientador";
+		    break;
+		    default:
+		    	return $potentialAction;	    
+		}
+	}	
 }	 
 
 
