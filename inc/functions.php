@@ -62,6 +62,11 @@ function fixes($marc) {
 	//print_r($marc);
 	$body = [];
 		
+	if ($marc["record"]["BAS"]["a"][0] == "Catalogação Rápida"){
+		unset($marc);
+		$body["naoIndexar"] = true;
+	}	
+
 	if ($marc["record"]["BAS"]["a"][0] == 01){
 		unset($marc);
 		$body["naoIndexar"] = true;
