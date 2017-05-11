@@ -330,11 +330,26 @@ class decode {
 	static function language($language){
 		switch ($language) {
 		    case "por":
-			return "Português";
-		    break;
+				return "Português";
+		    	break;
 		    case "eng":
-			return "Inglês";
-		    break;
+				return "Inglês";
+		    	break;
+		    case "spa":
+				return "Espanhol";
+		    	break;
+		    case "fre":
+				return "Francês";
+		    	break;
+		    case "mul":
+				return "Multiplos idiomas";
+		    	break;
+		    case "ger":
+				return "Alemão";
+		    	break;
+		    case "ita":
+				return "Italiano";
+		    	break;																						
 		    default:
 		    	return $language;		    		    
 		}
@@ -343,23 +358,257 @@ class decode {
 	/* Decodificar pais */
 	static function country($country){
 		switch ($country) {
+		    case "ag":
+				return "Argentina";
+		    	break;
+		    case "at":
+				return "Austrália";
+		    	break;
+		    case "au":
+				return "Áustria";
+		    	break;
+		    case "be":
+				return "Bélgica";
+		    	break;																	
 		    case "bl":
-			return "Brasil";
-		    break;
+				return "Brasil";
+		    	break;
+		    case "bo":
+				return "Bolívia";
+		    	break;
+		    case "bu":
+				return "Bulgária";
+		    	break;
+		    case "cau":
+				return "Estados Unidos";
+		    	break;
+		    case "cc":
+				return "China";
+		    	break;
+		    case "ch":
+				return "China";
+		    	break;
+		    case "ci":
+				return "Croácia";
+		    	break;
+		    case "ck":
+				return "Colômbia";
+		    	break;
+		    case "cl":
+				return "Chile";
+		    	break;
+		    case "cr":
+				return "Costa Rica";
+		    	break;
+		    case "cu":
+				return "Cuba";
+		    	break;
+		    case "dcu":
+				return "Estados Unidos";
+		    	break;
+		    case "dk":
+				return "Dinamarca";
+		    	break;
+		    case "dr":
+				return "República Dominicana";
+		    	break;
+		    case "ec":
+				return "Equador";
+		    	break;
+		    case "enk":
+				return "Inglaterra";
+		    	break;
+		    case "et":
+				return "Etiópia";
+		    	break;
+		    case "fi":
+				return "Finlândia";
+		    	break;
+		    case "flu":
+				return "Estados Unidos";
+		    	break;
+		    case "fr":
+				return "França";
+		    	break;
+		    case "gb":
+				return "República de Kiribati";
+		    	break;
+		    case "gr":
+				return "Grécia";
+		    	break;
+		    case "gw":
+				return "Alemanha";
+		    	break;
+		    case "hk":
+				return "Hong-Kong";
+		    	break;
+		    case "hu":
+				return "Hungria";
+		    	break;
+		    case "ie":
+				return "Irlanda";
+		    	break;
+		    case "ii":
+				return "Índia";
+		    	break;
+		    case "ilu":
+				return "Estados Unidos";
+		    	break;
+		    case "ir":
+				return "Irã";
+		    	break;
+		    case "is":
+				return "Israel";
+		    	break;
+		    case "it":
+				return "Itália";
+		    	break;
+		    case "ja":
+				return "Japão";
+		    	break;
+		    case "ko":
+				return "Coreia do Sul";
+		    	break;
+		    case "mau":
+				return "Estados Unidos";
+		    	break;
+		    case "mdu":
+				return "Estados Unidos";
+		    	break;
+		    case "mx":
+				return "México";
+		    	break;
+		    case "ne":
+				return "Holanda";
+		    	break;
+		    case "nl":
+				return "Nova Caledonia";
+		    	break;
+		    case "no":
+				return "Noruega";
+		    	break;
+		    case "nr":
+				return "Nigéria";
+		    	break;
+		    case "nju":
+				return "Estados Unidos";
+		    	break;
+		    case "nyu":
+				return "Estados Unidos";
+		    	break;
+		    case "nz":
+				return "Nova Zelândia";
+		    	break;
+		    case "pau":
+				return "Estados Unidos";
+		    	break;
+		    case "pe":
+				return "Peru";
+		    	break;
+		    case "pk":
+				return "Paquistão";
+		    	break;
+		    case "pl":
+				return "Polônia";
+		    	break;
+		    case "pr":
+				return "Porto Rico";
+		    	break;
+		    case "po":
+				return "Portugal";
+		    	break;
+		    case "py":
+				return "Paraguai";
+		    	break;	
+		    case "riu":
+				return "Estados Unidos";
+		    	break;
+		    case "rm":
+				return "Romênia";
+		    	break;
+		    case "ru":
+				return "Rússia";
+		    	break;
+		    case "sa":
+				return "África do Sul";
+		    	break;
+		    case "si":
+				return "Singapura";
+		    	break;
+		    case "sp":
+				return "Espanha";
+		    	break;
+		    case "stk":
+				return "Escócia";
+		    	break;
+		    case "sw":
+				return "Suécia";
+		    	break;
+		    case "sz":
+				return "Suiça";
+		    	break;
+		    case "th":
+				return "Tailândia";
+		    	break;
+		    case "ts":
+				return "Emirados Árabes Unidos";
+		    	break;
+		    case "tu":
+				return "Turquia";
+		    	break;
+		    case "xr":
+				return "República Checa";
+		    	break;
+		    case "xx":
+				return "Desconhecido";
+		    	break;
+		    case "xxk":
+				return "Reino Unido";
+		    	break;																																																																																																																																																																																																																																																																																																				
 		    case "xxu":
-			return "Estados Unidos";
-		    break;
+				return "Estados Unidos";
+		    	break;
+		    case "xxc":
+				return "Canadá";
+		    	break;
+		    case "ua":
+				return "Egito";
+		    	break;
+		    case "uy":
+				return "Uruguai";
+		    	break;
+		    case "uk":
+				return "Reino Unido";
+		    	break;
+		    case "yu":
+				return "Iugoslávia";
+		    	break;
+		    case "vau":
+				return "Estados Unidos";
+		    	break;
+		    case "ve":
+				return "Venezuela";
+		    	break;
+		    case "xr":
+				return "República Tcheca";
+		    	break;
+		    case "wau":
+				return "Estados Unidos";
+		    	break;																																											
 		    default:
 		    	return $country;		    		    
 		}
 	}
-	
+
 	/* Decodificar função */
 	static function potentialAction($potentialAction){
 		switch ($potentialAction) {
 		    case "orient":
-			return "Orientador";
-		    break;
+				return "Orientador";
+		    	break;
+		    case "co-orient":
+				return "Co-orientador";
+		    	break;				
 		    default:
 		    	return $potentialAction;	    
 		}
