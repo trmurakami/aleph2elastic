@@ -18,7 +18,7 @@ function processaAlephseq($line) {
 
 	
 	$control_fields = array("LDR","FMT","001","008");
-	$repetitive_fields = array("100","650","700","856","946","952","CAT");
+	$repetitive_fields = array("100","650","651","655","700","856","946","952","CAT");
 	
 	if (in_array($field,$control_fields)) {
 		$marc["record"][$field]["content"] = trim(substr($line, 18));			
@@ -62,37 +62,6 @@ function fixes($marc) {
 	//print_r($marc);
 	$body = [];
 		
-	if ($marc["record"]["BAS"]["a"][0] == "Catalogação Rápida"){
-		unset($marc);
-		$body["naoIndexar"] = true;
-	}	
-
-	if ($marc["record"]["BAS"]["a"][0] == 01){
-		unset($marc);
-		$body["naoIndexar"] = true;
-	}	
-	
-	if (isset($marc)) {	
-		if ($marc["record"]["BAS"]["a"][0] == 02){
-			unset($marc);
-			$body["naoIndexar"] = true;
-		}
-	}
-
-	if (isset($marc)) {	
-		if ($marc["record"]["BAS"]["a"][0] == 03){
-			$body["naoIndexar"] = false;
-			$body["doc"]["base"][] = "Teses e dissertações";
-		}
-	}
-	
-	if (isset($marc)) {	
-		if ($marc["record"]["BAS"]["a"][0] == 04){
-			$body["naoIndexar"] = false;
-			$body["doc"]["base"][] = "Produção científica";
-		}
-	}
-	
 	if (isset($marc["record"]["020"])) {
 		$body["doc"]["isbn"] = $marc["record"]["020"]["a"][0]; 
 	}
@@ -117,14 +86,23 @@ function fixes($marc) {
 			$author["person"]["name"] = $person["a"];
 			if (!empty($person["4"])) {
 				$potentialAction_correct = decode::potentialAction($person["4"]);
-				$author["person"]["potentialAction"] = $potentialAction_correct;
-			}			
+				$author["person"]["potentialAction"] = $potentialAction_correct;				
+			}
+			if (!empty($person["d"])) {
+				$author["person"]["date"] = $person["d"];
+			}						
 			if (!empty($person["8"])) {
 				$author["person"]["affiliation"]["name"] = $person["8"];
 			}
 			if (!empty($person["9"])) {	
 				$author["person"]["affiliation"]["location"] = $person["9"];
-			}				
+			}
+			if (!empty($potentialAction_correct)) {
+				$author["person"]["USP"]["autor_funcao"] = $person["a"] . " / " . $potentialAction_correct;
+			}
+
+
+
 		}
 		
 		$body["doc"]["author"][] = $author;
@@ -135,13 +113,34 @@ function fixes($marc) {
 	if (isset($marc["record"]["245"])) {
 		$body["doc"]["name"] = $marc["record"]["245"]["a"][0]; 
 	}
+
+	if (isset($marc["record"]["246"])) {
+		$body["doc"]["alternateName"] = $marc["record"]["246"]["a"][0]; 
+	}	
+
+	
 	
 	if (isset($marc["record"]["260"])) {
 		if (isset($marc["record"]["260"]["b"])){
 			$body["doc"]["publisher"]["organization"]["name"] = $marc["record"]["260"]["b"][0];
-		}	
-		$body["doc"]["publisher"]["organization"]["location"] = $marc["record"]["260"]["a"][0]; 
+		}
+		if (isset($marc["record"]["260"]["a"])){	
+			$body["doc"]["publisher"]["organization"]["location"] = $marc["record"]["260"]["a"][0];
+		}	 
 	}
+
+	if (isset($marc["record"]["382"]["a"])) {
+		foreach (($marc["record"]["382"]["a"]) as $meio_de_expressao) {
+			$body["doc"]["USP"]["meio_de_expressao"][] = $meio_de_expressao;
+		} 
+	}
+
+	if (isset($marc["record"]["500"]["a"])) {
+		foreach (($marc["record"]["500"]["a"]) as $notas) {
+			$body["doc"]["USP"]["notes"][] = $notas;
+		} 
+
+	}			
 	
 
 	if (isset($marc["record"]["502"])) {
@@ -184,6 +183,18 @@ function fixes($marc) {
 			$body["doc"]["about"][] = $subject["a"];
 		}
 	}
+
+	if (isset($marc["record"]["651"])) {
+		foreach (($marc["record"]["651"]) as $subject) {
+			$body["doc"]["about"][] = $subject["a"];
+		}
+	}
+
+	if (isset($marc["record"]["655"])) {
+		foreach ($marc["record"]["655"] as $genero_e_forma) {
+			$body["doc"]["USP"]["about"]["genero_e_forma"][] = $genero_e_forma["a"];
+		}
+	}		
 	
 	if (isset($marc["record"]["700"])) {
 	
@@ -198,7 +209,10 @@ function fixes($marc) {
 			if (!empty($person["4"])) {
 				$potentialAction_correct = decode::potentialAction($person["4"]);
 				$author["person"]["potentialAction"] = $potentialAction_correct;
-			}				
+			}
+			if (!empty($potentialAction_correct)) {
+				$author["person"]["USP"]["autor_funcao"] = $person["a"] . " / " . $potentialAction_correct;
+			}							
 			$body["doc"]["author"][] = $author;
 			unset($person);
 			unset($author);			
@@ -217,7 +231,7 @@ function fixes($marc) {
 	if (isset($marc["record"]["856"])) {
 	
 		foreach ($marc["record"]["856"] as $url) {
-			if ($url["3"] == "Documento completo" | $url["3"] == "BDTD") {
+			if ($url["3"] == "Documento completo" | $url["3"] == "BDTD" | $url["3"] == "Servidor ECA" ) {
 				$body["doc"]["url"][] = $url["u"];
 			}					
 		} 	
@@ -603,16 +617,54 @@ class decode {
 	/* Decodificar função */
 	static function potentialAction($potentialAction){
 		switch ($potentialAction) {
+		    case "adapt":
+				return "Adaptação";
+		    	break;
+		    case "arranjo mus":
+				return "Arranjo musical / Arranjador musical";
+		    	break;
+		    case "comp":
+				return "Compilador";
+		    	break;
+		    case "compos":
+				return "Compositor musical";
+		    	break;
+		    case "coord pesq musico":
+				return "Coordenador de pesquisa musicológica";
+		    	break;																						
+		    case "co-orient":
+				return "Co-orientador";
+		    	break;
+		    case "ed":
+				return "Editor";
+		    	break;
+		    case "elab":
+				return "Elaborador";
+		    	break;
+		    case "pref":
+				return "Prefácio";
+		    	break;
+		    case "rev":
+				return "Revisor";
+		    	break;
+		    case "text":
+				return "Autor texto";
+		    	break;
+		    case "trad":
+				return "Tradução";
+		    	break;
+		    case "transc":
+				return "Transcrição";
+		    	break;																																				
 		    case "orient":
 				return "Orientador";
 		    	break;
-		    case "co-orient":
-				return "Co-orientador";
-		    	break;				
+			
 		    default:
 		    	return $potentialAction;	    
 		}
-	}	
+	}
+
 }	 
 
 

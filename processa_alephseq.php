@@ -2,7 +2,6 @@
 <?php
 
 $marc = [];
-$i = 0;
 $id = 0;
 
 include 'inc/config.php';
@@ -18,15 +17,51 @@ while( $line = fgets(STDIN) ) {
 
 /* Processa os fixes */
 
-if (!empty($marc)){
-	//print_r($marc);
-	$body = fixes($marc);
-	//print_r($body); 
+if ($marc["record"]["BAS"]["a"][0] == "Catalogação Rápida"){
+	
+}	
+
+if ($marc["record"]["BAS"]["a"][0] == 01){
+
 }
 
-if ($body["naoIndexar"] == true ){
-	//echo "Registro não é da base 03 ou 04";
-} else {
-	$response = elasticsearch::elastic_update($id,$type,$body);
-	//print_r($response);	
+if ($marc["record"]["BAS"]["a"][0] == 02){
+
 }
+
+if ($marc["record"]["BAS"]["a"][0] == 03){
+
+	$body = fixes($marc);
+	$body["doc"]["base"][] = "Teses e dissertações";
+	$response = elasticsearch::elastic_update($id,$type,$body);
+
+}
+
+if ($marc["record"]["BAS"]["a"][0] == 04){
+
+	$body = fixes($marc);
+	$body["doc"]["base"][] = "Produção científica";
+	$response = elasticsearch::elastic_update($id,$type,$body);
+
+}		
+
+if ($marc["record"]["945"]["b"][0] == "PARTITURA"){
+
+	$index = "partituras";
+	$body = fixes($marc);
+
+	if (isset($marc["record"]["260"])) {
+		if (isset($marc["record"]["260"]["c"])){
+			$excluir_caracteres = array("[","]","c");
+			$only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+			$body["doc"]["datePublished"] = $only_numbers;
+		}	
+		$body["doc"]["datePublished"] = "N/D"; 
+	}
+
+
+	$body["doc"]["base"][] = "Livros";
+	$response = elasticsearch::elastic_update($id,"partitura",$body);
+
+} 
+
