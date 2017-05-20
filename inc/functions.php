@@ -2,6 +2,7 @@
 
 include 'inc/functions_core.php';
 
+
 /*
 * Converte Alephseq em JSON *
 */
@@ -92,7 +93,12 @@ function fixes($marc) {
 				$author["person"]["date"] = $person["d"];
 			}						
 			if (!empty($person["8"])) {
-				$author["person"]["affiliation"]["name"] = $person["8"];
+				$resultadoTematres = consultaTematres($person["8"]);
+				if (!empty($resultadoTematres["termo_correto"])) {
+					$author["person"]["affiliation"]["name"] = $resultadoTematres["termo_correto"];
+				} else {
+					$author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["termo_nao_encontrado"];
+				}				
 			}
 			if (!empty($person["9"])) {	
 				$author["person"]["affiliation"]["location"] = $person["9"];
@@ -100,8 +106,6 @@ function fixes($marc) {
 			if (!empty($potentialAction_correct)) {
 				$author["person"]["USP"]["autor_funcao"] = $person["a"] . " / " . $potentialAction_correct;
 			}
-
-
 
 		}
 		
@@ -116,9 +120,7 @@ function fixes($marc) {
 
 	if (isset($marc["record"]["246"])) {
 		$body["doc"]["alternateName"] = $marc["record"]["246"]["a"][0]; 
-	}	
-
-	
+	}		
 	
 	if (isset($marc["record"]["260"])) {
 		if (isset($marc["record"]["260"]["b"])){
@@ -200,8 +202,13 @@ function fixes($marc) {
 	
 		foreach (($marc["record"]["700"]) as $person) { 
 			$author["person"]["name"] = $person["a"];
-			if (!empty($person["8"])) {			
-				$author["person"]["affiliation"]["name"] = $person["8"];
+			if (!empty($person["8"])) {
+				$resultadoTematres = consultaTematres($person["8"]);
+				if (!empty($resultadoTematres["termo_correto"])) {
+					$author["person"]["affiliation"]["name"] = $resultadoTematres["termo_correto"];
+				} else {
+					$author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["termo_nao_encontrado"];
+				}				
 			}
 			if (!empty($person["9"])) {
 				$author["person"]["affiliation"]["location"] = $person["9"];
@@ -225,7 +232,17 @@ function fixes($marc) {
 	}	
 
 	if (isset($marc["record"]["773"])) {
-		$body["doc"]["isPartOf"] = $marc["record"]["773"]["t"][0];
+		if (isset($marc["record"]["773"]["t"])) {
+			$body["doc"]["isPartOf"]["name"] = $marc["record"]["773"]["t"][0];
+		}
+		if (isset($marc["record"]["773"]["x"])) {	
+			$body["doc"]["isPartOf"]["issn"] = $marc["record"]["773"]["x"][0];
+			$result_qualis = qualis_issn($marc["record"]["773"]["x"][0]);
+			if ($result_qualis["hits"]["total"] == 1) {
+				$body["doc"]["USP"]["serial_metrics"] = $result_qualis["hits"]["hits"][0]["_source"];
+			}
+		}	
+
 	}
 	
 	if (isset($marc["record"]["856"])) {
@@ -267,13 +284,19 @@ function fixes($marc) {
 	
 		foreach (($marc["record"]["946"]) as $authorUSP) {
 			$authorUSP_array["name"] = $authorUSP["a"];
-			$authorUSP_array["unidadeUSP"] = $authorUSP["e"];
+			$authorUSP_array["codpes"] = $authorUSP["b"];
+			$authorUSP_array["unidadeUSP"] = decode::unidadeAntiga($authorUSP["e"]);
+			$authorUSP_array["regime_de_trabalho"] = $authorUSP["j"];
+			if (isset($authorUSP["k"])) {
+				$authorUSP_array["funcao"] = $authorUSP["k"];
+			}
+			
 			
 			if (isset($authorUSP["g"])) {
 				$authorUSP_array["departament"] = $authorUSP["g"];
 			}	
 			$body["doc"]["authorUSP"][] = $authorUSP_array;
-			$body["doc"]["unidadeUSP"][] = $authorUSP["e"];	
+			$body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSP["e"]);	
 		}
 
 	}
@@ -308,6 +331,9 @@ function fixes($marc) {
 	
 }
 
+/*
+* Decodifica dados *
+*/
 class decode {
 
 	/* Pegar o tipo de material */
@@ -363,7 +389,22 @@ class decode {
 		    	break;
 		    case "ita":
 				return "Italiano";
-		    	break;																						
+		    	break;
+		    case "jpn":
+				return "Japonês";
+		    	break;
+		    case "rus":
+				return "Russo";
+		    	break;
+		    case "chi":
+				return "Chinês";
+		    	break;
+		    case "pol":
+				return "Polonês";
+		    	break;
+		    case "dut":
+				return "Holandês";
+		    	break;																																																
 		    default:
 		    	return $language;		    		    
 		}
@@ -375,6 +416,9 @@ class decode {
 		    case "ag":
 				return "Argentina";
 		    	break;
+		    case "aru":
+				return "Estados Unidos";
+		    	break;					
 		    case "at":
 				return "Austrália";
 		    	break;
@@ -432,6 +476,9 @@ class decode {
 		    case "enk":
 				return "Inglaterra";
 		    	break;
+		    case "es":
+				return "El Salvador";
+		    	break;					
 		    case "et":
 				return "Etiópia";
 		    	break;
@@ -453,6 +500,9 @@ class decode {
 		    case "gw":
 				return "Alemanha";
 		    	break;
+		    case "gt":
+				return "Guatemala";
+		    	break;					
 		    case "hk":
 				return "Hong-Kong";
 		    	break;
@@ -489,9 +539,15 @@ class decode {
 		    case "mdu":
 				return "Estados Unidos";
 		    	break;
+		    case "mou":
+				return "Estados Unidos";
+		    	break;					
 		    case "mx":
 				return "México";
 		    	break;
+		    case "my":
+				return "Malásia";
+		    	break;					
 		    case "ne":
 				return "Holanda";
 		    	break;
@@ -525,6 +581,9 @@ class decode {
 		    case "pl":
 				return "Polônia";
 		    	break;
+		    case "pn":
+				return "Panamá";
+		    	break;					
 		    case "pr":
 				return "Porto Rico";
 		    	break;
@@ -570,6 +629,9 @@ class decode {
 		    case "tu":
 				return "Turquia";
 		    	break;
+		    case "txu":
+				return "Estados Unidos";
+		    	break;					
 		    case "xr":
 				return "República Checa";
 		    	break;
@@ -588,6 +650,9 @@ class decode {
 		    case "ua":
 				return "Egito";
 		    	break;
+		    case "utu":
+				return "Estados Unidos";
+		    	break;					
 		    case "uy":
 				return "Uruguai";
 		    	break;
@@ -665,7 +730,84 @@ class decode {
 		}
 	}
 
+	/* Vincular Unidades antigas */
+	static function unidadeAntiga($unidade){
+		switch ($unidade) {
+		    case "IFQSC-Q":
+				return "IQSC";
+		    	break;
+		    case "IFQSC-F":
+				return "IFSC";
+		    	break;
+		    case "ICMSC":
+				return "ICMC";
+		    	break;
+		    case "CBM":
+				return "CEBIMAR";
+		    	break;
+		    case "HPRLLP":
+				return "HRAC";
+		    	break;
+		    default:
+		    	return $unidade;
+		}
+	}	
+
 }	 
 
+/*
+* Consulta o Tematres *
+*/
+function consultaTematres ($termo) {
+	$ch = curl_init();
+	$method = "GET";
+	$url = 'http://bdpife2.sibi.usp.br/instituicoes/vocab/services.php?task=fetch&arg='.rawurlencode($termo).'&output=json';                            
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));	
+	$result_get_id_tematres = curl_exec($ch);
+	$resultado_get_id_tematres = json_decode($result_get_id_tematres, true);
+	curl_close($ch);
+
+
+	if ($resultado_get_id_tematres["resume"]["cant_result"] != 0) {
+		foreach($resultado_get_id_tematres["result"] as $key => $val) {
+			$term_key = $key;
+		}
+		
+		$ch = curl_init();
+		$method = "GET";
+		$url = 'http://bdpife2.sibi.usp.br/instituicoes/vocab/services.php?task=fetchTerm&arg='.$term_key.'&output=json';
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
+		$result_term = curl_exec($ch);
+		$resultado_term = json_decode($result_term, true);
+		$termo_correto = $resultado_term["result"]["term"]["string"];
+		curl_close($ch);
+	} else {
+		$termo_nao_encontrado = $termo;
+	}
+
+	return compact('termo_correto','termo_nao_encontrado');
+
+}
+
+/*
+* Consulta o Qualis de uma Obra *
+*/
+function qualis_issn ($issn) {
+		$index = "serial_metrics";
+		$type = "qualis";
+		$body["query"]["ids"]["values"][] = $issn;
+		global $client;
+		$params = [];
+		$params["index"] = $index;
+		$params["type"] = $type;
+		$params["body"] = $body;
+		
+		$response = $client->search($params);        
+		return $response;
+}
 
 ?>
