@@ -57,5 +57,5 @@ while( $line = fgets(STDIN) ) {
     $record = [];
     $query = [];
     
-    usleep(2500000);
+    usleep(3000);
 }
