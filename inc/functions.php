@@ -245,6 +245,9 @@ function fixes($marc) {
 		if (isset($marc["record"]["773"]["t"])) {
 			$body["doc"]["isPartOf"]["name"] = $marc["record"]["773"]["t"][0];
 		}
+		if (isset($marc["record"]["773"]["h"])) {
+			$body["doc"]["isPartOf"]["USP"]["dados_do_periodico"] = $marc["record"]["773"]["h"][0];
+		}		
 		if (isset($marc["record"]["773"]["x"])) {	
 			$body["doc"]["isPartOf"]["issn"] = $marc["record"]["773"]["x"][0];
 			$result_qualis = qualis_issn($marc["record"]["773"]["x"][0]);
