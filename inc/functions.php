@@ -19,7 +19,7 @@ function processaAlephseq($line) {
 
 	
 	$control_fields = array("LDR","FMT","001","008");
-	$repetitive_fields = array("100","650","651","655","700","856","946","952","CAT");
+	$repetitive_fields = array("100","536","650","651","655","700","856","946","952","CAT");
 	
 	if (in_array($field,$control_fields)) {
 		$marc["record"][$field]["content"] = trim(substr($line, 18));			
@@ -62,6 +62,10 @@ function fixes($marc) {
 
 	//print_r($marc);
 	$body = [];
+
+	//if (isset($marc["record"]["001"])) {
+	//	print_r($marc["record"]["001"]["content"]);
+	//}	
 		
 	if (isset($marc["record"]["020"])) {
 		$body["doc"]["isbn"] = $marc["record"]["020"]["a"][0]; 
@@ -157,7 +161,13 @@ function fixes($marc) {
 	
 	if (isset($marc["record"]["536"])) {
 		foreach (($marc["record"]["536"]) as $funder) {
-			$body["doc"]["funder"][] = $funder["a"];
+			//print_r($funder);
+				$resultado_tematres_funder = consultaTematres($funder["a"]);
+				if (!empty($resultado_tematres_funder["termo_correto"])) {
+					$body["doc"]["funder"][] = $resultado_tematres_funder["termo_correto"];
+				} else {
+					$body["doc"]["funder"][] = $resultado_tematres_funder["termo_nao_encontrado"];
+				}							
 		} 
 	}	
 	
@@ -284,9 +294,13 @@ function fixes($marc) {
 	
 		foreach (($marc["record"]["946"]) as $authorUSP) {
 			$authorUSP_array["name"] = $authorUSP["a"];
-			$authorUSP_array["codpes"] = $authorUSP["b"];
+			if (isset($authorUSP["b"])) {
+				$authorUSP_array["codpes"] = $authorUSP["b"];
+			}	
 			$authorUSP_array["unidadeUSP"] = decode::unidadeAntiga($authorUSP["e"]);
-			$authorUSP_array["regime_de_trabalho"] = $authorUSP["j"];
+			if (isset($authorUSP["j"])) {
+				$authorUSP_array["regime_de_trabalho"] = $authorUSP["j"];
+			}	
 			if (isset($authorUSP["k"])) {
 				$authorUSP_array["funcao"] = $authorUSP["k"];
 			}
