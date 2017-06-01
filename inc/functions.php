@@ -119,11 +119,20 @@ function fixes($marc) {
 	}
 	
 	if (isset($marc["record"]["245"])) {
-		$body["doc"]["name"] = $marc["record"]["245"]["a"][0]; 
+		if (isset($marc["record"]["245"]["b"][0])){
+			$body["doc"]["name"] = $marc["record"]["245"]["a"][0] . ": " . $marc["record"]["245"]["b"][0];
+		} else {
+			$body["doc"]["name"] = $marc["record"]["245"]["a"][0];
+		}
+		 
 	}
 
 	if (isset($marc["record"]["246"])) {
-		$body["doc"]["alternateName"] = $marc["record"]["246"]["a"][0]; 
+		if (isset($marc["record"]["246"]["b"][0])){
+			$body["doc"]["alternateName"] = $marc["record"]["246"]["a"][0] . ": " . $marc["record"]["246"]["b"][0];
+		} else {
+			$body["doc"]["alternateName"] = $marc["record"]["246"]["a"][0];
+		} 
 	}		
 	
 	if (isset($marc["record"]["260"])) {
