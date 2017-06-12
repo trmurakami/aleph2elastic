@@ -1,0 +1,95 @@
+DELETE /serial_metrics
+
+PUT /serial_metrics
+{
+  "settings": {
+    "number_of_shards" :   4,
+    "number_of_replicas" : 3,
+    "analysis": {
+        "filter": {
+            "portuguese_stop": {
+              "type":       "stop",
+              "stopwords":  "_portuguese_" 
+            },
+            "my_ascii_folding" : {
+                "type" : "asciifolding",
+                "preserve_original" : true
+            },
+            "portuguese_stemmer": {
+              "type":       "stemmer",
+              "language":   "light_portuguese"
+            }            
+      }, 
+      "analyzer": {
+        "portuguese": {
+          "tokenizer": "standard",
+          "filter":  [ "standard", "lowercase", "my_ascii_folding","portuguese_stop","portuguese_stemmer"]
+        }
+      }
+    }
+  }
+}
+
+PUT /serial_metrics/qualis/_mapping
+{
+  "qualis": {
+        "properties": {
+          "issn": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          },
+          "qualis": {
+            "properties": {
+              "2015": {
+                "properties": {
+                  "area": {
+                    "type": "text",
+                    "analyzer": "portuguese",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "area_nota": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  },
+                  "nota": {
+                    "type": "text",
+                    "fields": {
+                      "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "title": {
+            "type": "text",
+            "analyzer": "portuguese",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+  }
+  
+}
