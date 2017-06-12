@@ -20,8 +20,8 @@ while( $line = fgets(STDIN) ) {
         $qualis_array["nota"] = trim($record[3],"\"\n\r\f ");
         $qualis_array["area_nota"] = $qualis_array["area"]." / ".$qualis_array["nota"];
         
-        foreach( $body["doc"]["qualis"]["2015"] as $qualis2015 ){
-            $array_area_nota[] = $qualis2015["area_nota"];
+        foreach( $body["doc"]["qualis"]["2016"] as $qualis2016 ){
+            $array_area_nota[] = $qualis2016["area_nota"];
         }
 
         if (in_array($qualis_array["area_nota"], $array_area_nota)) {
@@ -32,7 +32,7 @@ while( $line = fgets(STDIN) ) {
             $qualis_array = [];
             continue 1;
         } else {
-            $body["doc"]["qualis"]["2015"][] = $qualis_array;
+            $body["doc"]["qualis"]["2016"][] = $qualis_array;
             $qualis_array = [];
         }                            
             $body["doc_as_upsert"] = true;
@@ -43,7 +43,7 @@ while( $line = fgets(STDIN) ) {
         $qualis_array["area"] = trim($record[2],"\"\n\r\f ");
         $qualis_array["nota"] = trim($record[3],"\"\n\r\f ");
         $qualis_array["area_nota"] = $qualis_array["area"]." / ".$qualis_array["nota"];
-        $body["doc"]["qualis"]["2015"][] = $qualis_array;
+        $body["doc"]["qualis"]["2016"][] = $qualis_array;
         $body["doc_as_upsert"] = true;
         unset($qualis_array);        
     }
@@ -51,11 +51,12 @@ while( $line = fgets(STDIN) ) {
     //print_r($body);
 
     $response = elasticsearch::elastic_update($id,"qualis",$body);
+    //print_r($response);
 
     $array_area_nota = [];
     $body = [];            
     $record = [];
     $query = [];
     
-    usleep(3000);
+    usleep(250);
 }
