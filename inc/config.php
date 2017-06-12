@@ -12,7 +12,7 @@
 
 	
 	/* Configurações do Elasticsearch */
-	$index = "sibi";
+	$index = "sibi_homologacao";
 	$type = "producao";
 
 	/* Load libraries for PHP composer */ 
