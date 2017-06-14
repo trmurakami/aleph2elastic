@@ -732,6 +732,12 @@ class decode {
 		    case "elab":
 				return "Elaborador";
 		    	break;
+		    case "entrev":
+				return "Entrevistador";
+		    	break;
+		    case "org":
+				return "Organizador";
+		    	break;										
 		    case "pref":
 				return "Prefácio";
 		    	break;
