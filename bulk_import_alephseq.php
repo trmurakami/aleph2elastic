@@ -38,15 +38,50 @@ while( $line = fgets(STDIN) ) {
 						$excluir_caracteres = array("[","]","c");
 						$only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
 						$body["doc"]["datePublished"] = $only_numbers;
+					} else {
+						$body["doc"]["datePublished"] = "N/D";
 					}	
-					$body["doc"]["datePublished"] = "N/D"; 
+					 
 				}
-
-				
 				$body["doc"]["base"][] = "Livros";
 				$response = elasticsearch::elastic_update($id,"partitura",$body);
 
+			} elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE CONCLUSAO DE CURSO - TCC") {
+				$index = "bdta_homologacao";
+				$body = fixes($marc);
+				$body["doc"]["base"][] = "Trabalhos acadêmicos";
+				$body["doc"]["sysno"] = $id;
+				if (isset($marc["record"]["260"])) {
+					if (isset($marc["record"]["260"]["c"])){
+						$excluir_caracteres = array("[","]","c");
+						$only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+						$body["doc"]["datePublished"] = $only_numbers;
+					} else {
+						$body["doc"]["datePublished"] = "N/D";
+					}	
+					 
+				}				
+				$response = elasticsearch::elastic_update($id,$type,$body);
+			} elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE ESPECIALIZACAO - TCE") {
+				$index = "bdta_homologacao";
+				$body = fixes($marc);
+				$body["doc"]["base"][] = "Trabalhos acadêmicos";
+				$body["doc"]["sysno"] = $id;
+				if (isset($marc["record"]["260"])) {
+					if (isset($marc["record"]["260"]["c"])){
+						$excluir_caracteres = array("[","]","c");
+						$only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+						$body["doc"]["datePublished"] = $only_numbers;
+					} else {
+						$body["doc"]["datePublished"] = "N/D";
+					}	
+					 
+				}				
+				$response = elasticsearch::elastic_update($id,$type,$body);
+			} else {
+
 			}
+
 			break;
 		case 02:
 			echo "Não indexar";
