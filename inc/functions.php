@@ -19,7 +19,7 @@ function processaAlephseq($line) {
 
 	
 	$control_fields = array("LDR","FMT","001","008");
-	$repetitive_fields = array("100","536","650","651","655","700","856","946","952","CAT");
+	$repetitive_fields = array("100","510","536","650","651","655","700","856","946","952","CAT");
 	
 	if (in_array($field,$control_fields)) {
 		$marc["record"][$field]["content"] = trim(substr($line, 18));			
@@ -41,9 +41,7 @@ function processaAlephseq($line) {
 			if (!empty($content_line)) {
 				$marc["record"][$field][substr($content_line, 0, 1)][] = trim(substr($content_line, 1));
 			}			
-		
-		}
-			
+		}			
 	}
 	
 	//$marc["record"][$field]["ind_1"] = $ind_1;
@@ -154,20 +152,24 @@ function fixes($marc) {
 		foreach (($marc["record"]["500"]["a"]) as $notas) {
 			$body["doc"]["USP"]["notes"][] = $notas;
 		} 
-
 	}			
 	
-
 	if (isset($marc["record"]["502"])) {
 		$body["doc"]["inSupportOf"] = $marc["record"]["502"]["a"][0]; 
 	}
-	
+
+	if (isset($marc["record"]["510"])) {
+		foreach (($marc["record"]["510"]["a"]) as $indexado) {
+			$body["doc"]["USP"]["indexacao"][] = $indexado;
+		} 
+	}	
+
 	if (isset($marc["record"]["520"])) {
 		foreach (($marc["record"]["520"]["a"]) as $description) {
 			$body["doc"]["description"][] = $description;
 		} 
-	}	
-	
+	}
+
 	if (isset($marc["record"]["536"])) {
 		foreach (($marc["record"]["536"]) as $funder) {
 			//print_r($funder);
@@ -286,9 +288,7 @@ function fixes($marc) {
 		
 		if (isset($marc["record"]["945"]["l"])){
 			$body["doc"]["USP"]["internacionalizacao"] = $marc["record"]["945"]["l"][0];
-		}
-		
-		
+		}		
 		switch ($marc["record"]["945"]["b"][0]) {
 		    case "MONOGRAFIA/LIVRO":
 			$body["doc"]["numberOfPages"] = $marc["record"]["300"]["a"][0];
@@ -296,14 +296,10 @@ function fixes($marc) {
 		    case "TESE":
 			$body["doc"]["dateCreated"] = $marc["record"]["945"]["i"][0];
 		    break;		    
-		}		
-		
-		
-
+		}
 	}
 	
-	if (isset($marc["record"]["946"])) {
-	
+	if (isset($marc["record"]["946"])) {	
 		foreach (($marc["record"]["946"]) as $authorUSP) {
 			$authorUSP_array["name"] = $authorUSP["a"];
 			if (isset($authorUSP["b"])) {
@@ -315,16 +311,13 @@ function fixes($marc) {
 			}	
 			if (isset($authorUSP["k"])) {
 				$authorUSP_array["funcao"] = $authorUSP["k"];
-			}
-			
-			
+			}		
 			if (isset($authorUSP["g"])) {
 				$authorUSP_array["departament"] = $authorUSP["g"];
 			}	
 			$body["doc"]["authorUSP"][] = $authorUSP_array;
 			$body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSP["e"]);	
 		}
-
 	}
 	
 	if (isset($marc["record"]["952"])) {
@@ -346,11 +339,8 @@ function fixes($marc) {
 			$body["doc"]["USP"]["CAT"][] = $CAT_array;
 		}
 		unset($CAT);
-		unset($CAT_array); 	
-		
+		unset($CAT_array);		
 	}		
-	
-	
 	
 	$body["doc_as_upsert"] = true;
 	return $body;
@@ -444,7 +434,10 @@ class decode {
 		    	break;
 		    case "aru":
 				return "Estados Unidos";
-		    	break;					
+		    	break;
+		    case "alu":
+				return "Estados Unidos";
+		    	break;											
 		    case "at":
 				return "Austrália";
 		    	break;
@@ -466,6 +459,9 @@ class decode {
 		    case "cau":
 				return "Estados Unidos";
 		    	break;
+		    case "cb":
+				return "Camboja";
+		    	break;					
 		    case "cc":
 				return "China";
 		    	break;
@@ -481,6 +477,9 @@ class decode {
 		    case "cl":
 				return "Chile";
 		    	break;
+		    case "cou":
+				return "Estados Unidos";
+		    	break;					
 		    case "cr":
 				return "Costa Rica";
 		    	break;
@@ -528,13 +527,25 @@ class decode {
 		    	break;
 		    case "gt":
 				return "Guatemala";
-		    	break;					
+		    	break;
+		    case "hiu":
+				return "Estados Unidos";
+		    	break;										
 		    case "hk":
 				return "Hong-Kong";
 		    	break;
+		    case "ho":
+				return "Honduras";
+		    	break;					
 		    case "hu":
 				return "Hungria";
 		    	break;
+		    case "iau":
+				return "Estados Unidos";
+		    	break;					
+		    case "ic":
+				return "Islândia";
+		    	break;					
 		    case "ie":
 				return "Irlanda";
 		    	break;
@@ -544,6 +555,12 @@ class decode {
 		    case "ilu":
 				return "Estados Unidos";
 		    	break;
+		    case "inu":
+				return "Estados Unidos";
+		    	break;					
+		    case "io":
+				return "Indonésia";
+		    	break;					
 		    case "ir":
 				return "Irã";
 		    	break;
@@ -556,30 +573,51 @@ class decode {
 		    case "ja":
 				return "Japão";
 		    	break;
+		    case "ke":
+				return "Quênia";
+		    	break;					
 		    case "ko":
 				return "Coreia do Sul";
 		    	break;
+		    case "li":
+				return "Lituânia";
+		    	break;					
 		    case "mau":
 				return "Estados Unidos";
 		    	break;
 		    case "mdu":
 				return "Estados Unidos";
 		    	break;
-		    case "mou":
+		    case "miu":
 				return "Estados Unidos";
 		    	break;					
+		    case "mou":
+				return "Estados Unidos";
+		    	break;
+		    case "mr":
+				return "Marrocos";
+		    	break;										
 		    case "mx":
 				return "México";
 		    	break;
 		    case "my":
 				return "Malásia";
-		    	break;					
+		    	break;
+		    case "mz":
+				return "Moçambique";
+		    	break;										
 		    case "ne":
 				return "Holanda";
 		    	break;
+		    case "ng":
+				return "Nigéria";
+		    	break;					
 		    case "nl":
 				return "Nova Caledonia";
 		    	break;
+		    case "nmu":
+				return "Estados Unidos";
+		    	break;					
 		    case "no":
 				return "Noruega";
 		    	break;
@@ -592,15 +630,24 @@ class decode {
 		    case "nyu":
 				return "Estados Unidos";
 		    	break;
+		    case "nvu":
+				return "Estados Unidos";
+		    	break;					
 		    case "nz":
 				return "Nova Zelândia";
 		    	break;
+		    case "ohu":
+				return "Estados Unidos";
+		    	break;					
 		    case "pau":
 				return "Estados Unidos";
 		    	break;
 		    case "pe":
 				return "Peru";
 		    	break;
+		    case "ph":
+				return "Filipinas";
+		    	break;					
 		    case "pk":
 				return "Paquistão";
 		    	break;
@@ -640,12 +687,18 @@ class decode {
 		    case "stk":
 				return "Escócia";
 		    	break;
+		    case "su":
+				return "Arábia Saudita";
+		    	break;					
 		    case "sw":
 				return "Suécia";
 		    	break;
 		    case "sz":
 				return "Suiça";
 		    	break;
+		    case "ti":
+				return "Tunísia";
+		    	break;					
 		    case "th":
 				return "Tailândia";
 		    	break;
@@ -657,7 +710,10 @@ class decode {
 		    	break;
 		    case "txu":
 				return "Estados Unidos";
-		    	break;					
+		    	break;
+		    case "xo":
+				return "Eslováquia";
+		    	break;										
 		    case "xr":
 				return "República Checa";
 		    	break;
@@ -673,12 +729,18 @@ class decode {
 		    case "xxc":
 				return "Canadá";
 		    	break;
+		    case "xv":
+				return "Eslovênia";
+		    	break;					
 		    case "ua":
 				return "Egito";
 		    	break;
 		    case "utu":
 				return "Estados Unidos";
-		    	break;					
+		    	break;
+		    case "un":
+				return "Ucrânia";
+		    	break;										
 		    case "uy":
 				return "Uruguai";
 		    	break;
@@ -699,7 +761,10 @@ class decode {
 		    	break;
 		    case "wau":
 				return "Estados Unidos";
-		    	break;																																											
+		    	break;
+		    case "wiu":
+				return "Estados Unidos";
+		    	break;																																																	
 		    default:
 		    	return $country;		    		    
 		}
