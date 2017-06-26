@@ -265,6 +265,10 @@ function fixes($marc) {
 			if ($result_qualis["hits"]["total"] == 1) {
 				$body["doc"]["USP"]["serial_metrics"] = $result_qualis["hits"]["hits"][0]["_source"];
 			}
+			$result_jcr = jcr_issn($marc["record"]["773"]["x"][0]);
+			if ($result_jcr["hits"]["total"] == 1) {
+				$body["doc"]["USP"]["JCR"] = $result_jcr["hits"]["hits"][0]["_source"];
+			}			
 		}	
 
 	}
@@ -896,6 +900,23 @@ function consultaTematres ($termo) {
 function qualis_issn ($issn) {
 		$index = "serial_metrics";
 		$type = "qualis";
+		$body["query"]["ids"]["values"][] = $issn;
+		global $client;
+		$params = [];
+		$params["index"] = $index;
+		$params["type"] = $type;
+		$params["body"] = $body;
+		
+		$response = $client->search($params);        
+		return $response;
+}
+
+/*
+* Consulta o JCR de uma Obra *
+*/
+function jcr_issn ($issn) {
+		$index = "serial_jcr";
+		$type = "JCR";
 		$body["query"]["ids"]["values"][] = $issn;
 		global $client;
 		$params = [];
