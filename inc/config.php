@@ -7,7 +7,7 @@
 
 	/* Endereço do server, sem http:// */ 
 	$hosts = [
-		'172.31.0.76' 
+		'172.31.0.90' 
 	];
 
 	
