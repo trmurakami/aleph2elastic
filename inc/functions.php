@@ -158,13 +158,13 @@ function fixes($marc) {
 		$body["doc"]["inSupportOf"] = $marc["record"]["502"]["a"][0]; 
 	}
 
-	if (isset($marc["record"]["510"])) {
+	if (isset($marc["record"]["510"]["a"])) {
 		foreach (($marc["record"]["510"]["a"]) as $indexado) {
 			$body["doc"]["USP"]["indexacao"][] = $indexado;
 		} 
 	}	
 
-	if (isset($marc["record"]["520"])) {
+	if (isset($marc["record"]["520"]["a"])) {
 		foreach (($marc["record"]["520"]["a"]) as $description) {
 			$body["doc"]["description"][] = $description;
 		} 
