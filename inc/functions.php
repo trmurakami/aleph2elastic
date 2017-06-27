@@ -268,7 +268,11 @@ function fixes($marc) {
 			$result_jcr = jcr_issn($marc["record"]["773"]["x"][0]);
 			if ($result_jcr["hits"]["total"] == 1) {
 				$body["doc"]["USP"]["JCR"] = $result_jcr["hits"]["hits"][0]["_source"];
-			}			
+			}
+			$result_wos = wos_issn($marc["record"]["773"]["x"][0]);
+			if ($result_wos["hits"]["total"] == 1) {
+				$body["doc"]["USP"]["WOS"] = $result_wos["hits"]["hits"][0]["_source"];
+			}							
 		}	
 
 	}
@@ -317,7 +321,7 @@ function fixes($marc) {
 				$authorUSP_array["funcao"] = $authorUSP["k"];
 			}		
 			if (isset($authorUSP["g"])) {
-				$authorUSP_array["departament"] = $authorUSP["g"];
+				$authorUSP_array["departament"] = $authorUSP_array["unidadeUSP"] . "-" . $authorUSP["g"];
 			}	
 			$body["doc"]["authorUSP"][] = $authorUSP_array;
 			$body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSP["e"]);	
@@ -917,6 +921,23 @@ function qualis_issn ($issn) {
 function jcr_issn ($issn) {
 		$index = "serial_jcr";
 		$type = "JCR";
+		$body["query"]["ids"]["values"][] = $issn;
+		global $client;
+		$params = [];
+		$params["index"] = $index;
+		$params["type"] = $type;
+		$params["body"] = $body;
+		
+		$response = $client->search($params);        
+		return $response;
+}
+
+/*
+* Consulta indexação na Web of Science de uma Obra *
+*/
+function wos_issn ($issn) {
+		$index = "serial_web_of_science";
+		$type = "WOS";
 		$body["query"]["ids"]["values"][] = $issn;
 		global $client;
 		$params = [];
