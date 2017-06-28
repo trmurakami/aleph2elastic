@@ -259,22 +259,31 @@ function fixes($marc) {
 		if (isset($marc["record"]["773"]["h"])) {
 			$body["doc"]["isPartOf"]["USP"]["dados_do_periodico"] = $marc["record"]["773"]["h"][0];
 		}		
-		if (isset($marc["record"]["773"]["x"])) {	
-			$body["doc"]["isPartOf"]["issn"] = $marc["record"]["773"]["x"][0];
-			$result_qualis = qualis_issn($marc["record"]["773"]["x"][0]);
-			if ($result_qualis["hits"]["total"] == 1) {
-				$body["doc"]["USP"]["serial_metrics"] = $result_qualis["hits"]["hits"][0]["_source"];
-			}
-			$result_jcr = jcr_issn($marc["record"]["773"]["x"][0]);
-			if ($result_jcr["hits"]["total"] == 1) {
-				$body["doc"]["USP"]["JCR"] = $result_jcr["hits"]["hits"][0]["_source"];
-			}
-			$result_wos = wos_issn($marc["record"]["773"]["x"][0]);
-			if ($result_wos["hits"]["total"] == 1) {
-				$body["doc"]["USP"]["WOS"] = $result_wos["hits"]["hits"][0]["_source"];
-			}							
-		}	
+		if (isset($marc["record"]["773"]["x"])) {
+			$issn_array = explode(";",$marc["record"]["773"]["x"][0]);
+			$body["doc"]["isPartOf"]["issn"] = $issn_array;
 
+			foreach ($issn_array as $issn_query) {
+				if (empty($body["doc"]["USP"]["serial_metrics"])){
+					$result_qualis = qualis_issn(trim($issn_query));
+					if ($result_qualis["hits"]["total"] == 1) {
+						$body["doc"]["USP"]["serial_metrics"] = $result_qualis["hits"]["hits"][0]["_source"];
+					}	
+				}
+				if (empty($body["doc"]["USP"]["JCR"])){
+					$result_jcr = jcr_issn(trim($issn_query));
+					if ($result_jcr["hits"]["total"] == 1) {
+						$body["doc"]["USP"]["JCR"] = $result_jcr["hits"]["hits"][0]["_source"];
+					}
+				}
+				if (empty($body["doc"]["USP"]["WOS"])){
+					$result_wos = wos_issn(trim($issn_query));
+					if ($result_wos["hits"]["total"] == 1) {
+						$body["doc"]["USP"]["WOS"] = $result_wos["hits"]["hits"][0]["_source"];
+					}
+				}
+			}			
+		}	
 	}
 	
 	if (isset($marc["record"]["856"])) {
@@ -428,7 +437,40 @@ class decode {
 		    	break;
 		    case "dut":
 				return "Holandês";
-		    	break;																																																
+		    	break;
+		    case "tur":
+				return "Turco";
+		    	break;
+		    case "hun":
+				return "Húngaro";
+		    	break;
+		    case "dan":
+				return "Dinamarquês";
+		    	break;
+		    case "cze":
+				return "Checo";
+		    	break;
+		    case "scc":
+				return "Sérvio";
+		    	break;
+		    case "swe":
+				return "Sueco";
+		    	break;
+		    case "ara":
+				return "Árabe";
+		    	break;
+		    case "cat":
+				return "Catalão";
+		    	break;
+		    case "kor":
+				return "Coreano";
+		    	break;
+		    case "heb":
+				return "Hebreu";
+		    	break;
+		    case "lat":
+				return "Latin";
+		    	break;																																																																																																									
 		    default:
 		    	return $language;		    		    
 		}
