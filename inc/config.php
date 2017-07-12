@@ -10,6 +10,8 @@
 		'172.31.0.90' 
 	];
 
+	//200.144.183.86
+
 	
 	/* Configurações do Elasticsearch */
 	$index = "sibi";
@@ -20,6 +22,9 @@
 
 	/* Load Elasticsearch Client */ 
 	$client = \Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build(); 
+
+	/* API Key Elsevier */
+	$api_elsevier = '7f59af901d2d86f78a1fd60c1bf9426a'; 
 
 
 ?>
