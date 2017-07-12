@@ -72,6 +72,24 @@ switch ($marc["record"]["BAS"]["a"][0]) {
 					
 			}				
 			$response = elasticsearch::elastic_update($id,$type,$body);
+
+		} elseif ($marc["record"]["945"]["b"][0] == "E-BOOK") {
+			$index = "ebooks";
+			$body = fixes($marc);
+
+			if (isset($marc["record"]["260"])) {
+				if (isset($marc["record"]["260"]["c"])){
+					$excluir_caracteres = array("[","]","c");
+					$only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+					$body["doc"]["datePublished"] = $only_numbers;
+				} else {
+					$body["doc"]["datePublished"] = "N/D";
+				}	
+					
+			}
+			$body["doc"]["base"][] = "E-Books";
+			$response = elasticsearch::elastic_update($id,$type,$body);	
+
 		} else {
 
 		}

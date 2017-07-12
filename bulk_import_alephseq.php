@@ -18,7 +18,7 @@ while( $line = fgets(STDIN) ) {
   else {
 
     foreach ($record as $linha_de_registro) {
-      processaAlephseq($linha_de_registro);
+      processaAlephseq($linha_de_registro);	  
     }
 
 	/* Processa os fixes */
@@ -32,7 +32,6 @@ while( $line = fgets(STDIN) ) {
 
 				$index = "partituras";
 				$body = fixes($marc);
-
 				if (isset($marc["record"]["260"])) {
 					if (isset($marc["record"]["260"]["c"])){
 						$excluir_caracteres = array("[","]","c");
@@ -47,6 +46,7 @@ while( $line = fgets(STDIN) ) {
 				$response = elasticsearch::elastic_update($id,"partitura",$body);
 
 			} elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE CONCLUSAO DE CURSO - TCC") {
+
 				$index = "bdta_homologacao";
 				$body = fixes($marc);
 				$body["doc"]["base"][] = "Trabalhos acadêmicos";
@@ -62,7 +62,9 @@ while( $line = fgets(STDIN) ) {
 					 
 				}				
 				$response = elasticsearch::elastic_update($id,$type,$body);
+
 			} elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE ESPECIALIZACAO - TCE") {
+
 				$index = "bdta_homologacao";
 				$body = fixes($marc);
 				$body["doc"]["base"][] = "Trabalhos acadêmicos";
@@ -74,10 +76,26 @@ while( $line = fgets(STDIN) ) {
 						$body["doc"]["datePublished"] = $only_numbers;
 					} else {
 						$body["doc"]["datePublished"] = "N/D";
-					}	
-					 
+					}					 
 				}				
 				$response = elasticsearch::elastic_update($id,$type,$body);
+
+			} elseif ($marc["record"]["945"]["b"][0] == "E-BOOK") {
+
+				$index = "ebooks";
+				$body = fixes($marc);
+				if (isset($marc["record"]["260"])) {
+					if (isset($marc["record"]["260"]["c"])){
+						$excluir_caracteres = array("[","]","c");
+						$only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+						$body["doc"]["datePublished"] = $only_numbers;
+					} else {
+						$body["doc"]["datePublished"] = "N/D";
+					}						
+				}
+				$body["doc"]["base"][] = "E-Books";
+				$response = elasticsearch::elastic_update($id,$type,$body);
+
 			} else {
 
 			}
@@ -103,16 +121,19 @@ while( $line = fgets(STDIN) ) {
 			$body["doc"]["base"][] = $marc["record"]["BAS"]["a"][0];
 			$body["doc"]["sysno"] = $id;
 			$response = elasticsearch::elastic_update($id,$type,$body);		
-	}
+	}	
+	echo "$sysno \n";
             
   $marc = [];
   $record = [];
 
   }
+  
 
 $sysno_old = $sysno;
 
 }
+
 
 
 

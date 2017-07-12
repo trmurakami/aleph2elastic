@@ -1,6 +1,7 @@
 <?php 
 
 include 'inc/functions_core.php';
+include 'inc/config.php';
 
 
 /*
@@ -282,6 +283,12 @@ function fixes($marc) {
 						$body["doc"]["USP"]["WOS"] = $result_wos["hits"]["hits"][0]["_source"];
 					}
 				}
+				if (empty($body["doc"]["USP"]["citescore"])){
+					$result_citescore = search_citescore(trim($issn_query));
+					if ($result_citescore["hits"]["total"] == 1) {
+						$body["doc"]["USP"]["citescore"] = $result_citescore["hits"]["hits"][0]["_source"];
+					}
+				}				
 			}			
 		}	
 	}
@@ -289,7 +296,7 @@ function fixes($marc) {
 	if (isset($marc["record"]["856"])) {
 	
 		foreach ($marc["record"]["856"] as $url) {
-			if ($url["3"] == "Documento completo" | $url["3"] == "BDTD" | $url["3"] == "Servidor ECA" ) {
+			if ($url["3"] == "Documento completo" | $url["3"] == "BDTD" | $url["3"] == "Servidor ECA" | $url["3"] == "DOI" | $url["3"] == "E-Livro" | trim($url["3"]) == "Ovid" | $url["3"] == "MOMW" | $url["3"] == "Science Direct - Environmental Science" | $url["3"] == "Recursos online" | $url["3"] == "CRCnetBase" | $url["3"] == "Base local ECA" | $url["3"] == "Springer" | $url["3"] == "Science Direct - Energy" | $url["3"] == "Ebrary" | $url["3"] == "Referex Engineering" ) {
 				$body["doc"]["url"][] = $url["u"];
 			}					
 		} 	
@@ -990,5 +997,62 @@ function wos_issn ($issn) {
 		$response = $client->search($params);        
 		return $response;
 }
+
+
+/*
+* Consulta Citescore e SJR *
+*/
+function search_citescore ($issn) {
+		$index = "citescore";		
+		$type = "issn";
+		$body["query"]["ids"]["values"][] = $issn;
+		global $client;		
+		$params = [];
+		$params["index"] = $index;
+		$params["type"] = $type;
+		$params["body"] = $body;		
+		$response = $client->search($params);
+
+		if ($response["hits"]["total"] > 0){
+			return $response;
+		} else {	
+			$data = citescore($issn);
+			if (!empty($data)) {
+				$result_data["hits"]["total"] = 1;
+				$result_data["hits"]["hits"][0]["_source"] = $data;
+				return $result_data;
+			}
+		} 
+}
+
+/*
+* Obtem dados da API do Citescore e SJR *
+*/
+function citescore ($issn) {
+				global $api_elsevier;
+        // Get cURL resource
+        $curl = curl_init();
+        // Set some options - we are passing in a useragent too here
+        curl_setopt_array($curl, array(
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_URL => 'https://api.elsevier.com/content/serial/title/issn/'.$issn.'?apiKey='.$api_elsevier.'',
+            CURLOPT_USERAGENT => 'Codular Sample cURL Request'
+        ));
+        // Send the request & save response to $resp
+        $data = curl_exec($curl);
+				print_r($data);				
+
+				$index = "citescore";
+				$data = json_decode ($data,TRUE);
+				$body["doc"] = $data;
+				$body["doc_as_upsert"] = true;
+				elasticsearch::elastic_update ($issn,"issn",$body);
+				return $data;				
+
+
+        // Close request to clear up some resources
+        curl_close($curl);
+}
+
 
 ?>
