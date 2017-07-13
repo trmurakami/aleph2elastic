@@ -204,7 +204,9 @@ function fixes($marc) {
 	
 	if (isset($marc["record"]["650"])) {
 		foreach (($marc["record"]["650"]) as $subject) {
-			$body["doc"]["about"][] = $subject["a"];
+			if (isset($subject["a"])) {
+				$body["doc"]["about"][] = $subject["a"];
+			}	
 		}
 	}
 
@@ -284,11 +286,17 @@ function fixes($marc) {
 					}
 				}
 				if (empty($body["doc"]["USP"]["citescore"])){
-					$result_citescore = search_citescore(trim($issn_query));
-					if ($result_citescore["hits"]["total"] == 1) {
+					$result_citescore = citescore_issn(trim($issn_query));
+					if ($result_citescore["hits"]["total"] >= 1) {
 						$body["doc"]["USP"]["citescore"] = $result_citescore["hits"]["hits"][0]["_source"];
 					}
 				}				
+				//if (empty($body["doc"]["USP"]["citescore_cover"])){
+				//	$result_citescore_cover = search_citescore(trim($issn_query));
+				//	if ($result_citescore_cover["hits"]["total"] == 1) {
+				//		$body["doc"]["USP"]["citescore_cover"] = $result_citescore_cover["hits"]["hits"][0]["_source"];
+				//	}
+				//}				
 			}			
 		}	
 	}
@@ -998,12 +1006,29 @@ function wos_issn ($issn) {
 		return $response;
 }
 
+/*
+* Consulta indexação na Web of Science de uma Obra *
+*/
+function citescore_issn ($issn) {
+		$index = "citescore";
+		$type = "issn";
+		$body["query"]["ids"]["values"][] = $issn;
+		global $client;
+		$params = [];
+		$params["index"] = $index;
+		$params["type"] = $type;
+		$params["body"] = $body;
+		
+		$response = $client->search($params);        
+		return $response;
+}
+
 
 /*
 * Consulta Citescore e SJR *
 */
 function search_citescore ($issn) {
-		$index = "citescore";		
+		$index = "citescore_cover";		
 		$type = "issn";
 		$body["query"]["ids"]["values"][] = $issn;
 		global $client;		
@@ -1042,7 +1067,7 @@ function citescore ($issn) {
         $data = curl_exec($curl);
 				print_r($data);				
 
-				$index = "citescore";
+				$index = "citescore_cover";
 				$data = json_decode ($data,TRUE);
 				$body["doc"] = $data;
 				$body["doc_as_upsert"] = true;
