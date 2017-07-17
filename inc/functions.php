@@ -96,7 +96,7 @@ function fixes($marc) {
 				$author["person"]["date"] = $person["d"];
 			}						
 			if (!empty($person["8"])) {
-				$resultadoTematres = consultaTematres($person["8"]);
+				$resultadoTematres = consultaTematres(trim($person["8"]));
 				if (!empty($resultadoTematres["termo_correto"])) {
 					$author["person"]["affiliation"]["name"] = $resultadoTematres["termo_correto"];
 				} else {
@@ -227,7 +227,7 @@ function fixes($marc) {
 		foreach (($marc["record"]["700"]) as $person) { 
 			$author["person"]["name"] = $person["a"];
 			if (!empty($person["8"])) {
-				$resultadoTematres = consultaTematres($person["8"]);
+				$resultadoTematres = consultaTematres(trim($person["8"]));
 				if (!empty($resultadoTematres["termo_correto"])) {
 					$author["person"]["affiliation"]["name"] = $resultadoTematres["termo_correto"];
 				} else {
