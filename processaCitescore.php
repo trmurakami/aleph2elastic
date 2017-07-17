@@ -36,13 +36,13 @@ while( $line = fgets(STDIN) ) {
 
         $body["doc"]["title"] = str_replace('"','',$record[1]);
         $body["doc"]["issn"][] = $id;
-        $array["citescore"] = (int)$record[2];
+        $array["citescore"] = floatval(str_replace(",",".",$record[2]));
         $array["percentile"] = (int)$record[3];
         $array["citation_count"] = (int)$record[4];
         $array["scholarly_output"] = (int)$record[5];
         $array["percent_cited"] = (int)$record[6];  
-        $array["SNIP"] = (int)$record[7];
-        $array["SJR"] = (int)$record[8];
+        $array["SNIP"] = floatval(str_replace(",",".",$record[7]));
+        $array["SJR"] = floatval(str_replace(",",".",$record[8]));
         $array["rank"] = (int)$record[9];
         $array["rank_out_of"] = (int)$record[10];
         $array["publisher"] = $record[11];
