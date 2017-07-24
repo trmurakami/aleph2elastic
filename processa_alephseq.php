@@ -21,6 +21,9 @@ switch ($marc["record"]["BAS"]["a"][0]) {
     case "Catalogação Rápida":
         echo "Não indexar";
         break;
+	case "Assinatura Combinada":
+        echo "Não indexar";
+        break;		
     case 01:        
 		if ($marc["record"]["945"]["b"][0] == "PARTITURA"){
 
