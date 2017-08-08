@@ -70,11 +70,11 @@ function fixes($marc) {
 		$body["doc"]["isbn"] = $marc["record"]["020"]["a"][0]; 
 	}
 	
-	if (isset($marc["record"]["024"])) {
+	if (isset($marc["record"]["024"]["a"])) {
 		$body["doc"]["doi"] = $marc["record"]["024"]["a"][0];
 	}
 	
-	if (isset($marc["record"]["041"])) {
+	if (isset($marc["record"]["041"]["a"])) {
 		$language_correct = decode::language($marc["record"]["041"]["a"][0]);
 		$body["doc"]["language"][] = $language_correct;
 	}
@@ -184,13 +184,13 @@ function fixes($marc) {
 	}	
 	
 	if (isset($marc["record"]["590"])) {
-		if (!empty($marc["record"]["590"]["d"])){
+		if (isset($marc["record"]["590"]["d"])){
 			$body["doc"]["USP"]["areaconcentracao"] = $marc["record"]["590"]["d"][0];
 		}
-		if (!empty($marc["record"]["590"]["m"])){
+		if (isset($marc["record"]["590"]["m"])){
 			$body["doc"]["USP"]["fatorimpacto"] = $marc["record"]["590"]["m"][0];
 		}
-		if (!empty($marc["record"]["590"]["n"])){
+		if (isset($marc["record"]["590"]["n"])){
 			$body["doc"]["USP"]["grupopesquisa"] = explode(";", $marc["record"]["590"]["n"][0]);
 		}					
 
@@ -304,8 +304,10 @@ function fixes($marc) {
 	if (isset($marc["record"]["856"])) {
 	
 		foreach ($marc["record"]["856"] as $url) {
-			if ($url["3"] == "Documento completo" | $url["3"] == "BDTD" | $url["3"] == "Servidor ECA" | $url["3"] == "DOI" | $url["3"] == "E-Livro" | trim($url["3"]) == "Ovid" | $url["3"] == "MOMW" | $url["3"] == "Science Direct - Environmental Science" | $url["3"] == "Recursos online" | $url["3"] == "CRCnetBase" | $url["3"] == "Base local ECA" | $url["3"] == "Springer" | $url["3"] == "Science Direct - Energy" | $url["3"] == "Ebrary" | $url["3"] == "Referex Engineering" ) {
-				$body["doc"]["url"][] = $url["u"];
+			if (isset($url["3"])){
+				if ($url["3"] == "Documento completo" | $url["3"] == "BDTD" | $url["3"] == "Servidor ECA" | $url["3"] == "DOI" | $url["3"] == "E-Livro" | trim($url["3"]) == "Ovid" | $url["3"] == "MOMW" | $url["3"] == "Science Direct - Environmental Science" | $url["3"] == "Recursos online" | $url["3"] == "CRCnetBase" | $url["3"] == "Base local ECA" | $url["3"] == "Springer" | $url["3"] == "Science Direct - Energy" | $url["3"] == "Ebrary" | $url["3"] == "Referex Engineering" ) {
+					$body["doc"]["url"][] = $url["u"];
+				}
 			}					
 		} 	
 
@@ -323,10 +325,16 @@ function fixes($marc) {
 		}		
 		switch ($marc["record"]["945"]["b"][0]) {
 		    case "MONOGRAFIA/LIVRO":
-			$body["doc"]["numberOfPages"] = $marc["record"]["300"]["a"][0];
+					if (isset($marc["record"]["300"]["a"][0])) {
+						$body["doc"]["numberOfPages"] = $marc["record"]["300"]["a"][0];
+					}			
 		    break;
 		    case "TESE":
-			$body["doc"]["dateCreated"] = $marc["record"]["945"]["i"][0];
+					if (isset($marc["record"]["945"]["i"][0])) {
+						$body["doc"]["dateCreated"] = $marc["record"]["945"]["i"][0];
+					} else {
+						$body["doc"]["dateCreated"] = "Não preenchido";
+					}
 		    break;		    
 		}
 	}
@@ -354,7 +362,7 @@ function fixes($marc) {
 	
 	if (isset($marc["record"]["952"])) {
 		foreach ($marc["record"]["952"] as $subject_BDTD) {			
-			if (isset($subject_BDTD["f"])) {
+			if (isset($subject_BDTD["a"])) {
 				$body["doc"]["USP"]["about_BDTD"][] = $subject_BDTD["a"];
 			}	
 		}
@@ -923,7 +931,7 @@ class decode {
 function consultaTematres ($termo) {
 	$ch = curl_init();
 	$method = "GET";
-	$url = 'http://bdpife2.sibi.usp.br/instituicoes/vocab/services.php?task=fetch&arg='.rawurlencode($termo).'&output=json';                            
+	$url = 'http://vocab.sibi.usp.br/instituicoes/vocab/services.php?task=fetch&arg='.rawurlencode($termo).'&output=json';                            
 	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));	
@@ -939,7 +947,7 @@ function consultaTematres ($termo) {
 		
 		$ch = curl_init();
 		$method = "GET";
-		$url = 'http://bdpife2.sibi.usp.br/instituicoes/vocab/services.php?task=fetchTerm&arg='.$term_key.'&output=json';
+		$url = 'http://vocab.sibi.usp.br/instituicoes/vocab/services.php?task=fetchTerm&arg='.$term_key.'&output=json';
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
