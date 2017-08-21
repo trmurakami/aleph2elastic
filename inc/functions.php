@@ -343,7 +343,7 @@ function fixes($marc) {
 		foreach (($marc["record"]["946"]) as $authorUSP) {
 			$authorUSP_array["name"] = $authorUSP["a"];
 			if (isset($authorUSP["b"])) {
-				$authorUSP_array["codpes"] = $authorUSP["b"];
+				$authorUSP_array["codpes"] = (string)((int)$authorUSP["b"]);
 			}	
 			$authorUSP_array["unidadeUSP"] = decode::unidadeAntiga($authorUSP["e"]);
 			if (isset($authorUSP["j"])) {
