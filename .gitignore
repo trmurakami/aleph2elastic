@@ -6,3 +6,4 @@ composer.phar
 vendor/
 data/
 log/
+inc/config.php
