@@ -8,7 +8,8 @@ include 'inc/functions.php';
 
 function processaFixes ($marc,$id){
 
-    global $type;
+	global $type;
+	global $index;
 
 /* Processa os fixes */
 
