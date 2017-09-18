@@ -163,6 +163,8 @@ while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
 		processaFixes($marc,$id);
 		// Excluir registros com DEL
 		if (!empty($marc["record"]["DEL"])) {
+			$exists_test = elasticsearch::elastic_get($id,$type,null);
+			print_r($exists_test);
 			elasticsearch::elastic_delete($id,$type);
 		}
         $marc = [];        
