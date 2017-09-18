@@ -106,6 +106,7 @@ switch ($marc["record"]["BAS"]["a"][0]) {
 			}
 			$body["doc"]["base"][] = "Livros";
 			$response = elasticsearch::elastic_update($id,$type,$body,"opac");
+			print_r($response);
 			
 		}
         break;
@@ -117,14 +118,14 @@ switch ($marc["record"]["BAS"]["a"][0]) {
 		$body["doc"]["base"][] = "Teses e dissertações";
 		$body["doc"]["sysno"] = $id;
         $response = elasticsearch::elastic_update($id,$type,$body,$index);
-        //print_r($response);
+        print_r($response);
         break;
     case 04:
 		$body = fixes($marc);
 		$body["doc"]["base"][] = "Produção científica";
 		$body["doc"]["sysno"] = $id;
         $response = elasticsearch::elastic_update($id,$type,$body,$index);
-        //print_r($response);
+        print_r($response);
         break;
     default:
         break;
