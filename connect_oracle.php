@@ -123,14 +123,14 @@ switch ($marc["record"]["BAS"]["a"][0]) {
 		$body = fixes($marc);
 		$body["doc"]["base"][] = "Teses e dissertações";
 		$body["doc"]["sysno"] = $id;
-        $response = elasticsearch::elastic_update($id,$type,$body);
+        $response = elasticsearch::elastic_update($id,$type,$body,$index);
         //print_r($response);
         break;
     case 04:
 		$body = fixes($marc);
 		$body["doc"]["base"][] = "Produção científica";
 		$body["doc"]["sysno"] = $id;
-        $response = elasticsearch::elastic_update($id,$type,$body);
+        $response = elasticsearch::elastic_update($id,$type,$body,$index);
         //print_r($response);
         break;
     default:
