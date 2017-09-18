@@ -9,16 +9,8 @@ include 'inc/functions.php';
 function processaFixes ($marc,$id){
 
 	global $type;
-	global $index;
 
 /* Processa os fixes */
-
-
-// Excluir registros com DEL
-if (!empty($marc["record"]["DEL"])) {
-	elasticsearch::elastic_delete($id,$type,$index);
-}
-
 
 switch ($marc["record"]["BAS"]["a"][0]) {
     case "Catalogação Rápida":
@@ -165,7 +157,11 @@ while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
         foreach ($result_oracle_sysno as $record_line) {
             processaAlephseq($record_line);
         }
-        processaFixes($marc,$id);
+		processaFixes($marc,$id);
+		// Excluir registros com DEL
+		if (!empty($marc["record"]["DEL"])) {
+			elasticsearch::elastic_delete($id,$type);
+		}
         $marc = [];        
     }
 }
