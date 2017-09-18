@@ -101,6 +101,20 @@ switch ($marc["record"]["BAS"]["a"][0]) {
 
 		} else {
 
+			$index = "opac";
+			$body = fixes($marc);
+			if (isset($marc["record"]["260"])) {
+			 	if (isset($marc["record"]["260"]["c"])){
+			 		$excluir_caracteres = array("[","]","c");
+			 		$only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+			 		$body["doc"]["datePublished"] = $only_numbers;
+			 	} else {
+					$body["doc"]["datePublished"] = "N/D";
+				}					
+			}
+			$body["doc"]["base"][] = "Livros";
+			$response = elasticsearch::elastic_update($id,$type,$body);
+			
 		}
         break;
     case 02:
