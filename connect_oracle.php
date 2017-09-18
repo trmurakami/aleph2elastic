@@ -8,7 +8,7 @@ include 'inc/functions.php';
 
 function processaFixes ($marc,$id){
 
-	global $type;
+	global $type;	
 
 /* Processa os fixes */
 
@@ -119,14 +119,14 @@ if (isset($marc["record"]["BAS"])) {
 			$body = fixes($marc);
 			$body["doc"]["base"][] = "Teses e dissertações";
 			$body["doc"]["sysno"] = $id;
-			$response = elasticsearch::elastic_update($id,$type,$body,$index);
+			$response = elasticsearch::elastic_update($id,$type,$body);
 			print_r($response);
 			break;
 		case 04:
 			$body = fixes($marc);
 			$body["doc"]["base"][] = "Produção científica";
 			$body["doc"]["sysno"] = $id;
-			$response = elasticsearch::elastic_update($id,$type,$body,$index);
+			$response = elasticsearch::elastic_update($id,$type,$body);
 			print_r($response);
 			break;
 		default:
