@@ -15,7 +15,7 @@ function processaFixes ($marc,$id){
 
 // Excluir registros com DEL
 if (!empty($marc["record"]["DEL"])) {
-	elasticsearch::elastic_delete($id,$type);
+	elasticsearch::elastic_delete($id,$type,$index);
 }
 
 
