@@ -12,6 +12,13 @@ function processaFixes ($marc,$id){
 
 /* Processa os fixes */
 
+
+// Excluir registros com DEL
+if (!empty($marc["record"]["DEL"])) {
+	elasticsearch::elastic_delete($id,$type);
+}
+
+
 switch ($marc["record"]["BAS"]["a"][0]) {
     case "Catalogação Rápida":
         echo "Não indexar";
