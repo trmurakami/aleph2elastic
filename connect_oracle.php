@@ -24,22 +24,19 @@ if (isset($marc["record"]["BAS"])) {
 		case 01:        
 			if ($marc["record"]["945"]["b"][0] == "PARTITURA"){
 
-				// $index = "partituras";
-				// $body = fixes($marc);
-
-				// if (isset($marc["record"]["260"])) {
-				// 	if (isset($marc["record"]["260"]["c"])){
-				// 		$excluir_caracteres = array("[","]","c");
-				// 		$only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
-				// 		$body["doc"]["datePublished"] = $only_numbers;
-				// 	} else {
-				// 		$body["doc"]["datePublished"] = "N/D";
-				// 	}	
-						
-				// }
-				// $body["doc"]["base"][] = "Livros";
-				// $response = elasticsearch::elastic_update($id,"partitura",$body);
-				// //print_r($response);
+				$body = fixes($marc);
+				if (isset($marc["record"]["260"])) {
+					if (isset($marc["record"]["260"]["c"])){
+						$excluir_caracteres = array("[","]","c");
+						$only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+						$body["doc"]["datePublished"] = $only_numbers;
+					} else {
+						$body["doc"]["datePublished"] = "N/D";
+					}					
+				}
+				$body["doc"]["base"][] = "Partituras";
+				$response = elasticsearch::elastic_update($id,"partitura",$body,"partituras");
+				print_r($response);				
 
 			} elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE CONCLUSAO DE CURSO - TCC") {
 				//$index = "bdta_homologacao";
@@ -163,9 +160,11 @@ while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
 		processaFixes($marc,$id);
 		// Excluir registros com DEL
 		if (!empty($marc["record"]["DEL"])) {
-			$exists_test = elasticsearch::elastic_get($id,$type,null);
-			print_r($exists_test);
-			elasticsearch::elastic_delete($id,$type);
+			$body_id["query"]["terms"]["_id"][] = $id;
+			$exists_test = elasticsearch::elastic_search($type,"",10,$body_id);
+			if ($exists_test["hits"]["total"] > 0) {
+				elasticsearch::elastic_delete($id,$type,"");
+			}
 		}
         $marc = [];        
     }
