@@ -305,7 +305,7 @@ function fixes($marc) {
 	
 		foreach ($marc["record"]["856"] as $url) {
 			if (isset($url["3"])){
-				if ($url["3"] == "Documento completo" | $url["3"] == "BDTD" | $url["3"] == "Servidor ECA" | $url["3"] == "DOI" | $url["3"] == "E-Livro" | trim($url["3"]) == "Ovid" | $url["3"] == "MOMW" | $url["3"] == "Science Direct - Environmental Science" | $url["3"] == "Recursos online" | $url["3"] == "CRCnetBase" | $url["3"] == "Base local ECA" | $url["3"] == "Springer" | $url["3"] == "Science Direct - Energy" | $url["3"] == "Ebrary" | $url["3"] == "Referex Engineering" ) {
+				if ($url["3"] == "Documento completo" | $url["3"] == "BDTD" | $url["3"] == "Servidor ECA" | $url["3"] == "DOI" | $url["3"] == "E-Livro" | trim($url["3"]) == "Ovid" | $url["3"] == "MOMW" | $url["3"] == "Science Direct - Environmental Science" | $url["3"] == "Recursos online" | $url["3"] == "CRCnetBase" | $url["3"] == "Base Local ECA" | $url["3"] == "Base local ECA" | $url["3"] == "Springer" | $url["3"] == "Science Direct - Energy" | $url["3"] == "Ebrary" | $url["3"] == "Referex Engineering" ) {
 					$body["doc"]["url"][] = $url["u"];
 				}
 			}					
