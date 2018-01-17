@@ -929,6 +929,8 @@ class decode {
 * Consulta o Tematres *
 */
 function consultaTematres ($termo) {
+	$termo = str_replace('"','',$termo);
+	$termo = str_replace('&','e',$termo);
 	$ch = curl_init();
 	$method = "GET";
 	$url = 'http://vocab.sibi.usp.br/instituicoes/vocab/services.php?task=fetch&arg='.rawurlencode($termo).'&output=json';                            
