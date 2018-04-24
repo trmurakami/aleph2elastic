@@ -1090,4 +1090,17 @@ function citescore ($issn) {
 }
 
 
+
+function oracle_sysno($sysno) {
+	global $conn;
+	$consulta_alephseq = "select Z00R_DOC_NUMBER, Z00R_FIELD_CODE, Z00R_ALPHA, Z00R_TEXT from USP01.Z00R where Z00R_DOC_NUMBER = '$sysno'";
+	$stid = oci_parse($conn, $consulta_alephseq) or die ("erro");
+	oci_execute($stid);
+	while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
+			$record[] = implode(" ", $row);        
+	}    
+	return $record;    
+}
+
+
 ?>
