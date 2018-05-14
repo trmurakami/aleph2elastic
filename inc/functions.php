@@ -324,7 +324,7 @@ function fixes($marc) {
 	
 	if (isset($marc["record"]["940"]["a"])) {
 		foreach (($marc["record"]["940"]["a"]) as $description) {
-			$body["doc"]["description-en"][] = $description;
+			$body["doc"]["descriptionEn"][] = $description;
 		} 
 	}	
 	
