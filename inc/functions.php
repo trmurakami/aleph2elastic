@@ -116,6 +116,14 @@ function fixes($marc) {
 		unset($person);
 		unset($author); 
 	}
+
+	if (isset($marc["record"]["242"])) {
+		if (isset($marc["record"]["242"]["b"][0])){
+			$body["doc"]["alternateName"] = $marc["record"]["242"]["a"][0] . ": " . $marc["record"]["242"]["b"][0];
+		} else {
+			$body["doc"]["alternateName"] = $marc["record"]["242"]["a"][0];
+		} 
+	}	
 	
 	if (isset($marc["record"]["245"])) {
 		if (isset($marc["record"]["245"]["b"][0])){
@@ -312,7 +320,13 @@ function fixes($marc) {
 		} 	
 
 
-	}			
+	}
+	
+	if (isset($marc["record"]["940"]["a"])) {
+		foreach (($marc["record"]["940"]["a"]) as $description) {
+			$body["doc"]["description-en"][] = $description;
+		} 
+	}	
 	
 	if (isset($marc["record"]["945"])) {
 		if (isset($marc["record"]["945"]["j"])){
