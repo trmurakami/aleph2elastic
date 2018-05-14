@@ -116,6 +116,14 @@ function fixes($marc) {
 		unset($person);
 		unset($author); 
 	}
+
+	if (isset($marc["record"]["242"])) {
+		if (isset($marc["record"]["242"]["b"][0])){
+			$body["doc"]["alternateName"] = $marc["record"]["242"]["a"][0] . ": " . $marc["record"]["242"]["b"][0];
+		} else {
+			$body["doc"]["alternateName"] = $marc["record"]["242"]["a"][0];
+		} 
+	}	
 	
 	if (isset($marc["record"]["245"])) {
 		if (isset($marc["record"]["245"]["b"][0])){
@@ -312,7 +320,13 @@ function fixes($marc) {
 		} 	
 
 
-	}			
+	}
+	
+	if (isset($marc["record"]["940"]["a"])) {
+		foreach (($marc["record"]["940"]["a"]) as $description) {
+			$body["doc"]["descriptionEn"][] = $description;
+		} 
+	}	
 	
 	if (isset($marc["record"]["945"])) {
 		if (isset($marc["record"]["945"]["j"])){
@@ -1087,6 +1101,19 @@ function citescore ($issn) {
 
         // Close request to clear up some resources
         curl_close($curl);
+}
+
+
+
+function oracle_sysno($sysno) {
+	global $conn;
+	$consulta_alephseq = "select Z00R_DOC_NUMBER, Z00R_FIELD_CODE, Z00R_ALPHA, Z00R_TEXT from USP01.Z00R where Z00R_DOC_NUMBER = '$sysno'";
+	$stid = oci_parse($conn, $consulta_alephseq) or die ("erro");
+	oci_execute($stid);
+	while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
+			$record[] = implode(" ", $row);        
+	}    
+	return $record;    
 }
 
 
