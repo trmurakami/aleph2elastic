@@ -370,7 +370,10 @@ function fixes($marc) {
 				$authorUSP_array["departament"] = $authorUSP_array["unidadeUSP"] . "-" . $authorUSP["g"];
 			}	
 			$body["doc"]["authorUSP"][] = $authorUSP_array;
-			$body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSP["e"]);	
+			$body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSP["e"]);
+			if (isset($authorUSP["o"])) {
+				$body["doc"]["USP"]["codpesOrientador"][] = $authorUSP["o"];
+			}						
 		}
 	}
 	
