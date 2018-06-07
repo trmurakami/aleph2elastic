@@ -1,6 +1,6 @@
-DELETE /serial_metrics
+DELETE /qualis
 
-PUT /serial_metrics
+PUT /qualis
 {
   "settings": {
     "number_of_shards" :   4,
@@ -30,7 +30,7 @@ PUT /serial_metrics
   }
 }
 
-PUT /serial_metrics/qualis/_mapping
+PUT /qualis/qualis/_mapping
 {
   "qualis": {
         "properties": {
