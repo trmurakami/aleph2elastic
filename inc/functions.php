@@ -196,8 +196,9 @@ function fixes($marc)
             if (isset($funder["f"])) {
                 $body["doc"]["funder"][$i_funder]["projectNumber"][] = $funder["f"];
             }
-
+            $i_funder++;
         }
+
     }
 
     if (isset($marc["record"]["590"])) {
@@ -246,7 +247,9 @@ function fixes($marc)
     if (isset($marc["record"]["700"])) {
 
         foreach (($marc["record"]["700"]) as $person) {
-            $author["person"]["name"] = $person["a"];
+            if (!empty($person["a"])) {
+                $author["person"]["name"] = $person["a"];
+            }
             if (!empty($person["8"])) {
                 $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
                 if (!empty($resultadoTematres["found_term"])) {

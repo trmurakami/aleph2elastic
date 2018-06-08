@@ -7,6 +7,7 @@ require 'inc/functions.php';
 $record = array();
 $sysno_old = '000000000';
 
+$i = 0;
 while ($line = fgets(STDIN)) {
     $sysno = substr($line, 0, 9);
     if ($sysno_old == '000000000') {
@@ -120,22 +121,53 @@ while ($line = fgets(STDIN)) {
             echo "Não indexar";
             break;
         case 03:
+            $update["update"]["_index"] = $index;
+            $update["update"]["_type"] = $type;
+            $update["update"]["_id"] = $id;        
             $body = fixes($marc);
             $body["doc"]["base"][] = "Teses e dissertações";
             $body["doc"]["sysno"] = $id;
-            $response = elasticsearch::elastic_update($id, $type, $body);
-            echo "\n";
-            //print_r($id);
-            break;
+
+            $params['body'][] = $update;
+            $params['body'][] = $body; 
+            
+            if ($i % 500 == 0) {
+
+                $responses = $client->bulk($params);
+                //print_r($responses);
+        
+                // erase the old bulk request
+                $params = ['body' => []];
+        
+                // unset the bulk response when you are done to save memory
+                unset($responses);
+            }  
+            
         case 04:
+            $update["update"]["_index"] = $index;
+            $update["update"]["_type"] = $type;
+            $update["update"]["_id"] = $id;
             $body = fixes($marc);
             $body["doc"]["base"][] = "Produção científica";
             $body["doc"]["sysno"] = $id;
-            $response = elasticsearch::elastic_update($id, $type, $body);
-            echo "\n";
-            print_r($id);
-            echo "\n";
-            break;
+
+            $params['body'][] = $update;
+            $params['body'][] = $body;
+
+            if ($i % 500 == 0) {
+
+                $responses = $client->bulk($params);
+                //print_r($responses);
+        
+                // erase the old bulk request
+                $params = ['body' => []];
+        
+                // unset the bulk response when you are done to save memory
+                unset($responses);
+            }            
+
+            //$response = elasticsearch::elastic_update($id, $type, $body);
+            
         default:
             break;
         }
@@ -146,11 +178,16 @@ while ($line = fgets(STDIN)) {
         $marc = [];
         $record = [];
 
-    }
-  
+    } 
 
     $sysno_old = $sysno;
+    $i++;
+}
 
+// Send the last batch if it exists
+if (!empty($params['body'])) {
+    $responses = $client->bulk($params);
+    //print_r($responses);
 }
 
 
