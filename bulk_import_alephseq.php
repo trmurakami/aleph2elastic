@@ -154,7 +154,7 @@ while ($line = fgets(STDIN)) {
             $params['body'][] = $update;
             $params['body'][] = $body;
 
-            if ($i % 500 == 0) {
+            if ($i % 250 == 0) {
 
                 $responses = $client->bulk($params);
                 //print_r($responses);
