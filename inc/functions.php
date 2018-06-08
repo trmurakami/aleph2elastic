@@ -60,6 +60,7 @@ function fixes($marc)
 {
 
     global $i;
+    global $tematresUrl;
 
     //print_r($marc);
     $body = [];
@@ -98,11 +99,12 @@ function fixes($marc)
                 $author["person"]["date"] = $person["d"];
             }
             if (!empty($person["8"])) {
-                $resultadoTematres = consultaTematres(trim($person["8"]));
-                if (!empty($resultadoTematres["termo_correto"])) {
-                    $author["person"]["affiliation"]["name"] = $resultadoTematres["termo_correto"];
+                $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
+                if (!empty($resultadoTematres["found_term"])) {
+                    $author["person"]["affiliation"]["name"] = $resultadoTematres["found_term"];
+                    $author["person"]["affiliation"]["locationTematres"] = $resultadoTematres["country"];
                 } else {
-                    $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["termo_nao_encontrado"];
+                    $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["term_not_found"];
                 }
             }
             if (!empty($person["9"])) {
@@ -184,16 +186,15 @@ function fixes($marc)
     if (isset($marc["record"]["536"])) {
         $i_funder = 0;
         foreach (($marc["record"]["536"]) as $funder) {
-            $resultado_tematres_funder = consultaTematres($funder["a"]);
-            if (!empty($resultado_tematres_funder["termo_correto"])) {
-                $body["doc"]["funder"][$i_funder]["name"] = $resultado_tematres_funder["termo_correto"];
+            $resultado_tematres_funder = authorities::tematres($funder["a"], $tematresUrl);
+            if (!empty($resultado_tematres_funder["found_term"])) {
+                $body["doc"]["funder"][$i_funder]["name"] = $resultado_tematres_funder["found_term"];
+                $body["doc"]["funder"][$i_funder]["location"] = $resultado_tematres_funder["country"];
             } else {
-                $body["doc"]["funder"][$i_funder]["name"] = $resultado_tematres_funder["termo_nao_encontrado"];
+                $body["doc"]["funder"][$i_funder]["name"] = $resultado_tematres_funder["term_not_found"];
             }
             if (isset($funder["f"])) {
-                foreach ($funder["f"] as $funderProject) {
-                    $body["doc"]["funder"][$i_funder]["projectNumber"][] = $funderProject;
-                }
+                $body["doc"]["funder"][$i_funder]["projectNumber"][] = $funder["f"];
             }
 
         }
@@ -247,11 +248,12 @@ function fixes($marc)
         foreach (($marc["record"]["700"]) as $person) {
             $author["person"]["name"] = $person["a"];
             if (!empty($person["8"])) {
-                $resultadoTematres = consultaTematres(trim($person["8"]));
-                if (!empty($resultadoTematres["termo_correto"])) {
-                    $author["person"]["affiliation"]["name"] = $resultadoTematres["termo_correto"];
+                $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
+                if (!empty($resultadoTematres["found_term"])) {
+                    $author["person"]["affiliation"]["name"] = $resultadoTematres["found_term"];
+                    $author["person"]["affiliation"]["locationTematres"] = $resultadoTematres["country"];
                 } else {
-                    $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["termo_nao_encontrado"];
+                    $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["term_not_found"];
                 }
             }
             if (!empty($person["9"])) {
@@ -972,47 +974,6 @@ class decode
 }
 
 /*
-* Consulta o Tematres *
-*/
-function consultaTematres($termo) 
-{
-    $termo = str_replace('"', '', $termo);
-    $termo = str_replace('&', 'e', $termo);
-    $ch = curl_init();
-    $method = "GET";
-    $url = 'http://vocab.sibi.usp.br/instituicoes/vocab/services.php?task=fetch&arg='.rawurlencode($termo).'&output=json';
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
-    $result_get_id_tematres = curl_exec($ch);
-    $resultado_get_id_tematres = json_decode($result_get_id_tematres, true);
-    curl_close($ch);
-
-
-    if ($resultado_get_id_tematres["resume"]["cant_result"] != 0) {
-        foreach ($resultado_get_id_tematres["result"] as $key => $val) {
-            $term_key = $key;
-        }
-
-        $ch = curl_init();
-        $method = "GET";
-        $url = 'http://vocab.sibi.usp.br/instituicoes/vocab/services.php?task=fetchTerm&arg='.$term_key.'&output=json';
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
-        $result_term = curl_exec($ch);
-        $resultado_term = json_decode($result_term, true);
-        $termo_correto = $resultado_term["result"]["term"]["string"];
-        curl_close($ch);
-    } else {
-        $termo_nao_encontrado = $termo;
-    }
-
-    return compact('termo_correto', 'termo_nao_encontrado');
-
-}
-
-/*
 * Consulta o Qualis de uma Obra *
 */
 function qualis_issn($issn) 
@@ -1090,7 +1051,8 @@ function citescore_issn($issn)
 {
     $index = "citescore";
     $type = "issn";
-    $body["query"]["ids"]["values"][] = $issn;
+
+    $body["query"]["bool"]["must"]["match"]["issn"] = $issn;
     global $client;
     if (!empty($issn)) {
         $params = [];
@@ -1136,39 +1098,6 @@ function search_citescore($issn)
         }
     }
 }
-
-/*
-* Obtem dados da API do Citescore e SJR *
-*/
-function citescore($issn) 
-{
-    global $api_elsevier;
-    // Get cURL resource
-    $curl = curl_init();
-    // Set some options - we are passing in a useragent too here
-    curl_setopt_array($curl, array(
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_URL => 'https://api.elsevier.com/content/serial/title/issn/'.$issn.'?apiKey='.$api_elsevier.'',
-            CURLOPT_USERAGENT => 'Codular Sample cURL Request'
-        )
-    );
-    // Send the request & save response to $resp
-    $data = curl_exec($curl);
-            print_r($data);
-
-            $index = "citescore_cover";
-            $data = json_decode($data, true);
-            $body["doc"] = $data;
-            $body["doc_as_upsert"] = true;
-            elasticsearch::elastic_update($issn, "issn", $body);
-            return $data;
-
-
-    // Close request to clear up some resources
-    curl_close($curl);
-}
-
-
 
 function oracle_sysno($sysno) 
 {
