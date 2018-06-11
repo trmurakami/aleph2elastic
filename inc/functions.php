@@ -124,6 +124,17 @@ function fixes($marc)
         unset($author);
     }
 
+    if (isset($marc["record"]["110"])) {
+
+        foreach (($marc["record"]["110"]) as $corporateName) {
+            $author["person"]["name"] = $corporateName["a"];
+        }
+
+        $body["doc"]["author"][] = $author;
+        unset($corporateName);
+        unset($author);
+    }    
+
     if (isset($marc["record"]["242"])) {
         if (isset($marc["record"]["242"]["b"][0])) {
             $body["doc"]["alternateName"] = $marc["record"]["242"]["a"][0] . ": " . $marc["record"]["242"]["b"][0];
