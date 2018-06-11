@@ -131,7 +131,7 @@ while ($line = fgets(STDIN)) {
             $params['body'][] = $update;
             $params['body'][] = $body; 
             
-            if ($i % 500 == 0) {
+            if ($i % 250 == 0) {
 
                 $responses = $client->bulk($params);
                 //print_r($responses);
@@ -141,7 +141,8 @@ while ($line = fgets(STDIN)) {
         
                 // unset the bulk response when you are done to save memory
                 unset($responses);
-            }  
+            } 
+            break; 
             
         case 04:
             $update["update"]["_index"] = $index;
@@ -167,7 +168,7 @@ while ($line = fgets(STDIN)) {
             }            
 
             //$response = elasticsearch::elastic_update($id, $type, $body);
-            
+            break;
         default:
             break;
         }
