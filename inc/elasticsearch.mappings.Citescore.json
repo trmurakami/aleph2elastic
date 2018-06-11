@@ -36,7 +36,7 @@ PUT /citescore/issn/_mapping
     "properties": {
         "citescore": {
         "properties": {
-            "2016": {
+            "2017": {
             "properties": {
                 "SJR": {
                 "type": "half_float",
