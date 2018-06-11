@@ -4,7 +4,7 @@
 require 'inc/config.php';
 require 'inc/functions.php';
 
-$handle = fopen("data/itens04_20180608.txt", "r");
+$handle = fopen("data/itens03_20180611.txt", "r");
 if ($handle) {
     while (($line = fgets($handle)) !== false) {
         // process the line read.
