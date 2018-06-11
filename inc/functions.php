@@ -91,6 +91,9 @@ function fixes($marc)
 
         foreach (($marc["record"]["100"]) as $person) {
             $author["person"]["name"] = $person["a"];
+            if (!empty($person["0"])) {
+                $author["person"]["orcid"] = $person["0"];
+            }               
             if (!empty($person["4"])) {
                 $potentialAction_correct = decode::potentialAction($person["4"]);
                 $author["person"]["potentialAction"] = $potentialAction_correct;
@@ -250,6 +253,9 @@ function fixes($marc)
             if (!empty($person["a"])) {
                 $author["person"]["name"] = $person["a"];
             }
+            if (!empty($person["0"])) {
+                $author["person"]["orcid"] = $person["0"];
+            }            
             if (!empty($person["8"])) {
                 $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
                 if (!empty($resultadoTematres["found_term"])) {
