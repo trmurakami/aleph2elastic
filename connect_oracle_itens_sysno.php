@@ -35,17 +35,17 @@ function processaFixes ($marc,$id){
     unset($body["doc"]["BAS"]);
     $body["doc_as_upsert"] = true;
     print_r($body);
-    $response = elasticsearch::elastic_update($id,$type,$body);
+    $response = elasticsearch::elastic_update($id, $type, $body);
     print_r($response);
 }
 
 function  oracle_sysno_item($sysno) {
-    global $conn;
-    $consulta_alephseq = "select substr(z103_rec_key_1,6,9) sysno, z13u.z13u_user_defined_3, z30.z30_barcode, z30.z30_sub_library, z30.z30_open_date, z30.z30_update_date, z30.z30_no_loans, z30.z30_call_no, z30.z30_inventory_number from USP50.Z30 
-    inner join usp01.z103 z103 on CONCAT(CONCAT('USP50',substr(z30.z30_rec_key,1,9)),'02') = z103.Z103_REC_KEY
-    inner join usp01.z13u z13u on substr(z103_rec_key_1,6,9) = z13u.Z13u_REC_KEY
-    where substr(z103_rec_key_1,6,9) = '$sysno'";
-    $stid = oci_parse($conn, $consulta_alephseq) or die ("erro");
+    global $connNew;
+    $consulta_alephseq = "select substr(z103.z103_rec_key_1,6,9) sysno, z13u.z13u_user_defined_3, z30.z30_barcode, z30.z30_sub_library, z30.z30_open_date, z30.z30_update_date, z30.z30_no_loans, z30.z30_call_no, z30.z30_inventory_number from USP50.Z30@ALPSRCH z30
+    inner join usp01.z103@ALPSRCH z103 on CONCAT(CONCAT('USP50',substr(z30.z30_rec_key,1,9)),'02') = z103.Z103_REC_KEY
+    inner join usp01.z13u@ALPSRCH z13u on substr(z103.z103_rec_key_1,6,9) = z13u.Z13u_REC_KEY
+    where substr(z103.z103_rec_key_1,6,9) = '$sysno'";
+    $stid = oci_parse($connNew, $consulta_alephseq) or die ("erro");
     oci_execute($stid);
     $i = 0;
     while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
@@ -72,7 +72,7 @@ function  oracle_sysno_item($sysno) {
     }
       
     // Close the Oracle connection
-    oci_close($conn);  
+    oci_close($connNew);  
 }
 
 foreach ($cursor["hits"]["hits"] as $r) {
