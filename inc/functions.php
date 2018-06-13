@@ -69,7 +69,7 @@ function fixes($marc)
     //	print_r($marc["record"]["001"]["content"]);
     //}
 
-    if (isset($marc["record"]["020"])) {
+    if (isset($marc["record"]["020"]["a"])) {
         $body["doc"]["isbn"] = $marc["record"]["020"]["a"][0];
     }
 
@@ -125,11 +125,7 @@ function fixes($marc)
     }
 
     if (isset($marc["record"]["110"])) {
-
-        foreach (($marc["record"]["110"]) as $corporateName) {
-            $author["person"]["name"] = $corporateName["a"];
-        }
-
+        $author["person"]["name"] = $marc["record"]["110"]["a"][0];
         $body["doc"]["author"][] = $author;
         unset($corporateName);
         unset($author);

@@ -34,7 +34,7 @@ function processaFixes ($marc,$id){
 						}					
 					}
 					$body["doc"]["base"][] = "Partituras";
-					$response = elasticsearch::elastic_update($id, "partitura", $body, "partituras");
+					$response = elasticsearch::elastic_update($id, $type, $body, "partituras");
 					print_r($response);				
 
 				} elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE CONCLUSAO DE CURSO - TCC") {
