@@ -144,8 +144,7 @@ while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
         $result_oracle_sysno = oracle_sysno($sysno);
         foreach ($result_oracle_sysno as $record_line) {
             processaAlephseq($record_line);
-        }
-		processaFixes($marc,$id);
+		}
 		// Excluir registros com DEL
 		if (!empty($marc["record"]["DEL"])) {
 			$body_id["query"]["terms"]["_id"][] = $id;
@@ -153,8 +152,10 @@ while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
 			if ($exists_test["hits"]["total"] > 0) {
 				elasticsearch::elastic_delete($id, $type,"");
 			}
+		} else {
+			processaFixes($marc,$id);
 		}
-        $marc = [];        
+		$marc = [];        
     }
 }
 
