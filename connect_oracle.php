@@ -132,7 +132,7 @@ function processaFixes ($marc,$id){
 }
 
 //bloco da consulta SQL
-$consulta = "select Z00_DOC_NUMBER from USP01.Z00 where ORA_ROWSCN > TIMESTAMP_TO_SCN(CURRENT_TIMESTAMP - NUMTODSINTERVAL(1440, 'MINUTE'))";
+$consulta = "select DISTINCT Z00_DOC_NUMBER from USP01.Z00 where ORA_ROWSCN > TIMESTAMP_TO_SCN(CURRENT_TIMESTAMP - NUMTODSINTERVAL(1440, 'MINUTE'))";
 //$consulta = "select Z00_DOC_NUMBER from USP01.Z00 Z00 where Z00_DOC_NUMBER IN (select Z13U_REC_KEY from USP01.Z13U where Z13U.Z13U_USER_DEFINED_3 IN ('03','04')) AND Z00.ORA_ROWSCN > TIMESTAMP_TO_SCN(CURRENT_TIMESTAMP - NUMTODSINTERVAL(10, 'MINUTE'))";
 $stid = oci_parse($conn, $consulta) or die ("erro");
  
