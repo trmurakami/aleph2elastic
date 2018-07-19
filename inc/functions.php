@@ -20,7 +20,7 @@ function processaAlephseq($line)
     //$ind_2 = substr($line, 14, 1);
 
 
-    $control_fields = array("LDR","FMT","001","008");
+    $control_fields = array("LDR","DEL","FMT","001","008");
     $repetitive_fields = array("100","510","536","650","651","655","700","856","946","952","CAT");
 
     if (in_array($field, $control_fields)) {
