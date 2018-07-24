@@ -30,83 +30,126 @@ PUT /citescore
   }
 }
 
-PUT /citescore/issn/_mapping
+PUT /citescore/citescore/_mapping
 {
-    "issn": {
-    "properties": {
-        "citescore": {
+    "citescore": {
         "properties": {
-            "2017": {
-            "properties": {
-                "SJR": {
-                "type": "half_float",
-                "fields": {
-                    "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                    }
+            "citescore": {
+                "properties": {
+                    "2017": {
+                        "properties": {
+                            "SJR": {
+                            "type": "half_float",
+                            "fields": {
+                                "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                                }
+                            }
+                            },
+                            "SNIP": {
+                            "type": "half_float",
+                            "fields": {
+                                "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                                }
+                            }
+                            },
+                            "citescore": {
+                            "type": "half_float",
+                            "fields": {
+                                "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                                }
+                            }
+                            }
+                        }
+                    },
+                    "2016": {
+                        "properties": {
+                            "SJR": {
+                            "type": "half_float",
+                            "fields": {
+                                "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                                }
+                            }
+                            },
+                            "SNIP": {
+                            "type": "half_float",
+                            "fields": {
+                                "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                                }
+                            }
+                            },
+                            "citescore": {
+                            "type": "half_float",
+                            "fields": {
+                                "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                                }
+                            }
+                            }
+                        }
+                    },
+                    "2015": {
+                        "properties": {
+                            "SJR": {
+                            "type": "half_float",
+                            "fields": {
+                                "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                                }
+                            }
+                            },
+                            "SNIP": {
+                            "type": "half_float",
+                            "fields": {
+                                "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                                }
+                            }
+                            },
+                            "citescore": {
+                            "type": "half_float",
+                            "fields": {
+                                "keyword": {
+                                "type": "keyword",
+                                "ignore_above": 256
+                                }
+                            }
+                            }
+                        }
+                    }                                        
                 }
-                },
-                "SNIP": {
-                "type": "half_float",
-                "fields": {
-                    "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                    }
+            },
+            "issn": {
+            "type": "text",
+            "fields": {
+                "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
                 }
-                },
-                "open_access": {
-                "type": "text",
-                "fields": {
-                    "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                    }
-                }
-                },
-                "citescore": {
-                "type": "half_float",
-                "fields": {
-                    "keyword": {
-                    "type": "keyword",
-                    "ignore_above": 256
-                    }
-                }
+            }
+            },       
+            "title": {
+            "type": "text",
+            "analyzer": "portuguese",
+            "fields": {
+                "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
                 }
             }
             }
         }
-        },
-        "issn": {
-        "type": "text",
-        "fields": {
-            "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-            }
-        }
-        },
-        "scopus_sub_subject_area": {
-        "type": "text",
-        "analyzer": "portuguese",
-        "fields": {
-            "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-            }
-        }
-        },        
-        "title": {
-        "type": "text",
-        "analyzer": "portuguese",
-        "fields": {
-            "keyword": {
-            "type": "keyword",
-            "ignore_above": 256
-            }
-        }
-        }
-    }
     }
 }
