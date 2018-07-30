@@ -309,39 +309,6 @@ function fixes($marc)
         if (isset($marc["record"]["773"]["x"])) {
             $issn_array = explode(";", $marc["record"]["773"]["x"][0]);
             $body["doc"]["isPartOf"]["issn"] = $issn_array;
-
-            foreach ($issn_array as $issn_query) {
-                if (empty($body["doc"]["USP"]["qualis"])) {
-                    $result_qualis = qualis_issn(trim($issn_query));
-                    if ($result_qualis["hits"]["total"] == 1) {
-                        $body["doc"]["USP"]["qualis"] = $result_qualis["hits"]["hits"][0]["_source"];
-                    }
-                }
-                if (empty($body["doc"]["USP"]["JCR"])) {
-                    $result_jcr = jcr_issn(trim($issn_query));
-                    if ($result_jcr["hits"]["total"] == 1) {
-                        $body["doc"]["USP"]["JCR"] = $result_jcr["hits"]["hits"][0]["_source"];
-                    }
-                }
-                if (empty($body["doc"]["USP"]["WOS"])) {
-                    $result_wos = wos_issn(trim($issn_query));
-                    if ($result_wos["hits"]["total"] == 1) {
-                        $body["doc"]["USP"]["WOS"] = $result_wos["hits"]["hits"][0]["_source"];
-                    }
-                }
-                // if (empty($body["doc"]["USP"]["citescore"])) {
-                //     $result_citescore = citescore_issn(trim($issn_query));
-                //     if ($result_citescore["hits"]["total"] >= 1) {
-                //         $body["doc"]["USP"]["citescore"] = $result_citescore["hits"]["hits"][0]["_source"];
-                //     }
-                // }
-                //if (empty($body["doc"]["USP"]["citescore_cover"])){
-                //	$result_citescore_cover = search_citescore(trim($issn_query));
-                //	if ($result_citescore_cover["hits"]["total"] == 1) {
-                //		$body["doc"]["USP"]["citescore_cover"] = $result_citescore_cover["hits"]["hits"][0]["_source"];
-                //	}
-                //}
-            }
         }
     }
 
