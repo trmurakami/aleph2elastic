@@ -120,6 +120,12 @@ case 04:
     $body["doc"]["sysno"] = $id;
     $response = elasticsearch::elastic_update($id, $type, $body);
     break;
+case 06:
+    $body = fixes($marc);
+    $body["doc"]["base"][] = "Trabalhos acadêmicos";
+    $body["doc"]["sysno"] = $id;
+    $response = elasticsearch::elastic_update($id, $type, $body, "bdta");
+    break;  
 default:
     $body = fixes($marc);
     $body["doc"]["base"][] = $marc["record"]["BAS"]["a"][0];
