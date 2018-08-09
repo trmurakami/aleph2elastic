@@ -147,7 +147,7 @@ while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
 		}
 		// Excluir registros com DEL
 		if (!empty($marc["record"]["DEL"])) {
-			sleep(10);
+			//sleep(10);
 			$body_id["query"]["terms"]["_id"][] = $id;
 			$exists_test = elasticsearch::elastic_search($type, "", 10, $body_id);
 			if ($exists_test["hits"]["total"] == 1) {
