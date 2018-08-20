@@ -52,7 +52,7 @@ function processaFixes ($marc,$id){
 						}	
 							
 					}				
-					$response = elasticsearch::elastic_update($id, $type, $body, "bdta");
+					$response = elasticsearch::elastic_update($id, $type, $body, "bdta_homologacao");
 					print_r($response);
 
 				} elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE ESPECIALIZACAO - TCE") {
@@ -70,7 +70,7 @@ function processaFixes ($marc,$id){
 						}	
 							
 					}				
-					$response = elasticsearch::elastic_update($id, $type, $body, "bdta");
+					$response = elasticsearch::elastic_update($id, $type, $body, "bdta_homologacao");
 					print_r($response);
 
 				} elseif ($marc["record"]["945"]["b"][0] == "E-BOOK") {
@@ -125,6 +125,12 @@ function processaFixes ($marc,$id){
 				$response = elasticsearch::elastic_update($id, $type, $body);
 				print_r($response);
 				break;
+			case 06:
+				$body = fixes($marc);
+				$body["doc"]["base"][] = "Trabalhos acadêmicos";
+				$body["doc"]["sysno"] = $id;
+				$response = elasticsearch::elastic_update($id, $type, $body, "bdta");
+				break;  				
 			default:
 				break;
 		}
