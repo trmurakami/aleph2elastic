@@ -153,12 +153,20 @@ while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
 		}
 		// Excluir registros com DEL
 		if (!empty($marc["record"]["DEL"])) {
-			//sleep(10);
-			$body_id["query"]["terms"]["_id"][] = $id;
-			$exists_test = elasticsearch::elastic_search($type, "", 10, $body_id);
-			if ($exists_test["hits"]["total"] == 1) {
-				elasticsearch::elastic_delete($id, $type, "");
-			}
+			print_r($id);
+			$result_delete = elasticsearch::elastic_delete($id, $type, "");
+			if ($result_delete["result"] == "not_found") {
+				$result_delete = elasticsearch::elastic_delete($id, $type, "partituras");
+				print_r($result_delete);
+				$result_delete = elasticsearch::elastic_delete($id, $type, "bdta_homologacao");
+				print_r($result_delete);
+				$result_delete = elasticsearch::elastic_delete($id, $type, "ebooks");
+				print_r($result_delete);
+				$result_delete = elasticsearch::elastic_delete($id, $type, "opac");
+				print_r($result_delete);
+				$result_delete = elasticsearch::elastic_delete($id, $type, "bdta");
+			}			
+			print_r($result_delete);
 		} else {
 			processaFixes($marc, $id);
 		}
