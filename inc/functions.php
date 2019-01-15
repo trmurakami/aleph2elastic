@@ -21,7 +21,7 @@ function processaAlephseq($line)
 
 
     $control_fields = array("LDR","DEL","FMT","001","008");
-    $repetitive_fields = array("100","510","536","650","651","655","700","856","946","952","CAT");
+    $repetitive_fields = array("100","510","536","650","651","655","700","856","946","952","960","961","CAT");
 
     if (in_array($field, $control_fields)) {
         $marc["record"][$field]["content"] = trim(substr($line, 18));
@@ -394,7 +394,7 @@ function fixes($marc)
         }
     }
 
-    if (isset($marc["record"]["960"])) {
+    if (isset($marc["record"]["960"])) {        
         foreach (($marc["record"]["960"]) as $authorUSPGrad) {
             $authorUSPGrad_array["name"] = $authorUSPGrad["a"];
             if (isset($authorUSPGrad["b"])) {
@@ -404,7 +404,7 @@ function fixes($marc)
                 $authorUSPGrad_array["unidadeUSP"] = decode::unidadeAntiga($authorUSPGrad["e"]);
             }
             if (isset($authorUSPGrad["h"])) {
-                $authorUSPGrad_array["nomeCurso"] = $authorUSPGrad["k"];
+                $authorUSPGrad_array["nomeCurso"] = $authorUSPGrad["h"];
             }            
             if (isset($authorUSPGrad["j"])) {
                 $authorUSPGrad_array["tipoCurso"] = $authorUSPGrad["j"];
