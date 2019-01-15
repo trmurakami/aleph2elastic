@@ -394,6 +394,30 @@ function fixes($marc)
         }
     }
 
+    if (isset($marc["record"]["960"])) {
+        foreach (($marc["record"]["960"]) as $authorUSPGrad) {
+            $authorUSPGrad_array["name"] = $authorUSPGrad["a"];
+            if (isset($authorUSPGrad["b"])) {
+                $authorUSPGrad_array["codpes"] = (string)((int)$authorUSPGrad["b"]);
+            }
+            if (isset($authorUSPGrad["e"])) {
+                $authorUSPGrad_array["unidadeUSP"] = decode::unidadeAntiga($authorUSPGrad["e"]);
+            }
+            if (isset($authorUSPGrad["h"])) {
+                $authorUSPGrad_array["nomeCurso"] = $authorUSPGrad["k"];
+            }            
+            if (isset($authorUSPGrad["j"])) {
+                $authorUSPGrad_array["tipoCurso"] = $authorUSPGrad["j"];
+            }
+            $body["doc"]["authorUSP"][] = $authorUSPGrad_array;
+            if (isset($authorUSPGrad["e"])) {
+                $body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSPGrad["e"]);
+            } else {
+                $body["doc"]["unidadeUSP"] = [];
+            }
+        }
+    }    
+
     if (isset($marc["record"]["CAT"])) {
         foreach ($marc["record"]["CAT"] as $CAT) {
             if (isset($CAT["a"])) {
