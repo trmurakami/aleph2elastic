@@ -409,6 +409,9 @@ function fixes($marc)
             if (isset($authorUSPGrad["j"])) {
                 $authorUSPGrad_array["tipoCurso"] = $authorUSPGrad["j"];
             }
+            if (isset($authorUSPGrad["y"])) {
+                $authorUSPGrad_array["habilitacaoCurso"] = $authorUSPGrad["y"];
+            }            
             $body["doc"]["authorUSP"][] = $authorUSPGrad_array;
             if (isset($authorUSPGrad["e"])) {
                 $body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSPGrad["e"]);
