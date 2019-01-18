@@ -21,7 +21,7 @@ function processaAlephseq($line)
 
 
     $control_fields = array("LDR","DEL","FMT","001","008");
-    $repetitive_fields = array("100","510","536","650","651","655","700","856","946","952","960","961","CAT");
+    $repetitive_fields = array("100","110","510","536","650","651","655","700","856","946","952","960","961","CAT");
 
     if (in_array($field, $control_fields)) {
         $marc["record"][$field]["content"] = trim(substr($line, 18));
