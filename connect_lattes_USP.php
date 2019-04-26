@@ -63,7 +63,7 @@ while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
     fwrite($xmlFile, $content); 
     fclose($xmlFile);
 
-    $output = shell_exec('curl -X POST -F "file=@'.__DIR__.'/curriculo.xml" -F "codpes='.$row["CODPES"].'" -F "unidadeUSP='.trim($row["SGLUND"]).'" -F "tag='.trim($row["NOMABVSET"]).'" -F "tipvin='.$row["TIPVIN"].'" http://143.107.154.38/dev_coletaprod/lattes_xml_to_elastic.php');
+    $output = shell_exec('curl -X POST -F "file=@'.__DIR__.'/curriculo.xml" -F "codpes='.$row["CODPES"].'" -F "unidadeUSP='.trim($row["SGLUND"]).'" -F "tag='.trim($row["NOMABVSET"]).'" -F "tipvin='.$row["TIPVIN"].'" http://172.31.0.91/coletaprod/lattes_xml_to_elastic.php');
     echo "<pre>$output</pre>";
 
 }
