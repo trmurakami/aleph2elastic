@@ -45,7 +45,7 @@ while ($line = fgets(STDIN)) {
                     }
                 }
                 $body["doc"]["base"][] = "Partituras";
-                $response = elasticsearch::elastic_update($id, "producao", $body, "partituras");
+                $response = elasticsearch::elastic_update($id, "producao", $body, "acorde");
                 //print_r($id);				
 
             } elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE CONCLUSAO DE CURSO - TCC") {
