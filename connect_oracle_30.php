@@ -34,7 +34,7 @@ function processaFixes ($marc,$id){
 						}					
 					}
 					$body["doc"]["base"][] = "Partituras";
-					$response = elasticsearch::elastic_update($id, $type, $body, "acorde");
+					$response = elasticsearch::elasticUpdate($id, $type, $body, "acorde");
 					print_r($response);				
 
 				} elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE CONCLUSAO DE CURSO - TCC") {
@@ -52,7 +52,7 @@ function processaFixes ($marc,$id){
 						}	
 							
 					}				
-					$response = elasticsearch::elastic_update($id, $type, $body, "bdta_homologacao");
+					$response = elasticsearch::elasticUpdate($id, $type, $body, "bdta_homologacao");
 					print_r($response);
 
 				} elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE ESPECIALIZACAO - TCE") {
@@ -70,7 +70,7 @@ function processaFixes ($marc,$id){
 						}	
 							
 					}				
-					$response = elasticsearch::elastic_update($id, $type, $body, "bdta_homologacao");
+					$response = elasticsearch::elasticUpdate($id, $type, $body, "bdta_homologacao");
 					print_r($response);
 
 				} elseif ($marc["record"]["945"]["b"][0] == "E-BOOK") {
@@ -87,7 +87,7 @@ function processaFixes ($marc,$id){
 						}	
 					}
 					$body["doc"]["base"][] = "E-Books";
-					$response = elasticsearch::elastic_update($id, $type, $body, "ebooks");
+					$response = elasticsearch::elasticUpdate($id, $type, $body, "ebooks");
 					print_r($response);	
 
 				} else {
@@ -103,7 +103,7 @@ function processaFixes ($marc,$id){
 						}					
 					}
 					$body["doc"]["base"][] = "Livros";
-					$response = elasticsearch::elastic_update($id, $type, $body, "opac");
+					$response = elasticsearch::elasticUpdate($id, $type, $body, "opac");
 					print_r($response);
 					
 				}
@@ -115,21 +115,21 @@ function processaFixes ($marc,$id){
 				$body = fixes($marc);
 				$body["doc"]["base"][] = "Teses e dissertações";
 				$body["doc"]["sysno"] = $id;
-				$response = elasticsearch::elastic_update($id, $type, $body);
+				$response = elasticsearch::elasticUpdate($id, $type, $body);
 				print_r($response);
 				break;
 			case 04:
 				$body = fixes($marc);
 				$body["doc"]["base"][] = "Produção científica";
 				$body["doc"]["sysno"] = $id;
-				$response = elasticsearch::elastic_update($id, $type, $body);
+				$response = elasticsearch::elasticUpdate($id, $type, $body);
 				print_r($response);
 				break;
 			case 06:
 				$body = fixes($marc);
 				$body["doc"]["base"][] = "Trabalhos acadêmicos";
 				$body["doc"]["sysno"] = $id;
-				$response = elasticsearch::elastic_update($id, $type, $body, "bdta");
+				$response = elasticsearch::elasticUpdate($id, $type, $body, "bdta");
 				break; 				
 			default:
 				break;
@@ -154,17 +154,17 @@ while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
 		// Excluir registros com DEL
 		if (!empty($marc["record"]["DEL"])) {
 			print_r($id);
-			$result_delete = elasticsearch::elastic_delete($id, $type, "");
+			$result_delete = elasticsearch::elasticDelete($id, $type, "");
 			if ($result_delete["result"] == "not_found") {
-				$result_delete = elasticsearch::elastic_delete($id, $type, "partituras");
+				$result_delete = elasticsearch::elasticDelete($id, $type, "partituras");
 				print_r($result_delete);
-				$result_delete = elasticsearch::elastic_delete($id, $type, "bdta_homologacao");
+				$result_delete = elasticsearch::elasticDelete($id, $type, "bdta_homologacao");
 				print_r($result_delete);
-				$result_delete = elasticsearch::elastic_delete($id, $type, "ebooks");
+				$result_delete = elasticsearch::elasticDelete($id, $type, "ebooks");
 				print_r($result_delete);
-				$result_delete = elasticsearch::elastic_delete($id, $type, "opac");
+				$result_delete = elasticsearch::elasticDelete($id, $type, "opac");
 				print_r($result_delete);
-				$result_delete = elasticsearch::elastic_delete($id, $type, "bdta");
+				$result_delete = elasticsearch::elasticDelete($id, $type, "bdta");
 			}			
 			print_r($result_delete);
 		} else {

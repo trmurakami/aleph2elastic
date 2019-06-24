@@ -52,7 +52,7 @@ while ($line = fgets(STDIN)) {
     $index = "citescore";
 
     //print_r($body);
-    $response = elasticsearch::elastic_update($sourceId, "citescore", $body);
+    $response = elasticsearch::elasticUpdate($sourceId, "citescore", $body);
     print_r($response);
     unset($body);
 

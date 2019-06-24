@@ -1,6 +1,6 @@
 <?php
 
-require 'functions_core/functions_core.php';
+require 'uspfind_core/uspfind_core.php';
 require 'inc/config.php';
 
 
@@ -101,15 +101,15 @@ function fixes($marc)
             if (!empty($person["d"])) {
                 $author["person"]["date"] = $person["d"];
             }
-            if (!empty($person["8"])) {
-                $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
-                if (!empty($resultadoTematres["found_term"])) {
-                    $author["person"]["affiliation"]["name"] = $resultadoTematres["found_term"];
-                    $author["person"]["affiliation"]["locationTematres"] = $resultadoTematres["country"];
-                } else {
-                    $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["term_not_found"];
-                }
-            }
+            // if (!empty($person["8"])) {
+            //     $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
+            //     if (!empty($resultadoTematres["found_term"])) {
+            //         $author["person"]["affiliation"]["name"] = $resultadoTematres["found_term"];
+            //         $author["person"]["affiliation"]["locationTematres"] = $resultadoTematres["country"];
+            //     } else {
+            //         $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["term_not_found"];
+            //     }
+            // }
             if (!empty($person["9"])) {
                 $author["person"]["affiliation"]["location"] = $person["9"];
             }
@@ -271,15 +271,15 @@ function fixes($marc)
             if (!empty($person["0"])) {
                 $author["person"]["orcid"] = $person["0"];
             }            
-            if (!empty($person["8"])) {
-                $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
-                if (!empty($resultadoTematres["found_term"])) {
-                    $author["person"]["affiliation"]["name"] = $resultadoTematres["found_term"];
-                    $author["person"]["affiliation"]["locationTematres"] = $resultadoTematres["country"];
-                } else {
-                    $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["term_not_found"];
-                }
-            }
+            // if (!empty($person["8"])) {
+            //     $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
+            //     if (!empty($resultadoTematres["found_term"])) {
+            //         $author["person"]["affiliation"]["name"] = $resultadoTematres["found_term"];
+            //         $author["person"]["affiliation"]["locationTematres"] = $resultadoTematres["country"];
+            //     } else {
+            //         $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["term_not_found"];
+            //     }
+            // }
             if (!empty($person["9"])) {
                 $author["person"]["affiliation"]["location"] = $person["9"];
             }
@@ -302,15 +302,15 @@ function fixes($marc)
     }
 
     if (isset($marc["record"]["773"])) {
-        if (isset($marc["record"]["773"]["t"])) {
-            $resultadoTematresPeriodicos = authorities::tematres(trim($marc["record"]["773"]["t"][0]), $tematresUrl);
-            if (!empty($resultadoTematresPeriodicos["found_term"])) {
-                $body["doc"]["isPartOf"]["name"] = $resultadoTematresPeriodicos["found_term"];
-                $body["doc"]["isPartOf"]["tematresOK"] = true;
-            } else {
-                $body["doc"]["isPartOf"]["name"] = $resultadoTematresPeriodicos["term_not_found"];
-            }            
-        }
+        // if (isset($marc["record"]["773"]["t"])) {
+        //     $resultadoTematresPeriodicos = authorities::tematres(trim($marc["record"]["773"]["t"][0]), $tematresUrl);
+        //     if (!empty($resultadoTematresPeriodicos["found_term"])) {
+        //         $body["doc"]["isPartOf"]["name"] = $resultadoTematresPeriodicos["found_term"];
+        //         $body["doc"]["isPartOf"]["tematresOK"] = true;
+        //     } else {
+        //         $body["doc"]["isPartOf"]["name"] = $resultadoTematresPeriodicos["term_not_found"];
+        //     }            
+        // }
         if (isset($marc["record"]["773"]["h"])) {
             $body["doc"]["isPartOf"]["USP"]["dados_do_periodico"] = $marc["record"]["773"]["h"][0];
         }
@@ -1134,6 +1134,168 @@ function oracle_sysno($sysno)
             $record[] = implode(" ", $row);
     }
     return $record;
+}
+
+function importToElastic($marc) {
+
+    global $index;
+    global $id;
+
+    switch ($marc["record"]["BAS"]["a"][0]) {
+        case "Catalogação Rápida":
+            echo "Não indexar";
+            break;
+        case "Assinatura Combinada":
+            echo "Não indexar";
+            break;
+        case 01:        
+            if ($marc["record"]["945"]["b"][0] == "PARTITURA") {
+
+                $body = fixes($marc);
+                if (isset($marc["record"]["260"])) {
+                    if (isset($marc["record"]["260"]["c"])) {
+                        $excluir_caracteres = array("[","]","c");
+                        $only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+                        $body["doc"]["datePublished"] = $only_numbers;
+                    } else {
+                        $body["doc"]["datePublished"] = "N/D";
+                    }
+                }
+                $body["doc"]["base"][] = "Partituras";
+                $response = elasticsearch::elasticUpdate($id, "producao", $body, "acorde");
+                //print_r($id);				
+
+            } elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE CONCLUSAO DE CURSO - TCC") {
+
+                $body = fixes($marc);
+                $body["doc"]["base"][] = "Trabalhos acadêmicos";
+                $body["doc"]["sysno"] = $id;
+                if (isset($marc["record"]["260"])) {
+                    if (isset($marc["record"]["260"]["c"])) {
+                        $excluir_caracteres = array("[","]","c");
+                        $only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+                        $body["doc"]["datePublished"] = $only_numbers;
+                    } else {
+                        $body["doc"]["datePublished"] = "N/D";
+                    }
+                        
+                }
+                $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta_homologacao");
+                //print_r($id);
+
+            } elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE ESPECIALIZACAO - TCE") {
+
+                $body = fixes($marc);
+                $body["doc"]["base"][] = "Trabalhos acadêmicos";
+                $body["doc"]["sysno"] = $id;
+                if (isset($marc["record"]["260"])) {
+                    if (isset($marc["record"]["260"]["c"])) {
+                        $excluir_caracteres = array("[","]","c");
+                        $only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+                        $body["doc"]["datePublished"] = $only_numbers;
+                    } else {
+                        $body["doc"]["datePublished"] = "N/D";
+                    }                        
+                }
+                $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta_homologacao");
+                //print_r($id);
+
+            } elseif ($marc["record"]["945"]["b"][0] == "E-BOOK") {
+
+                $body = fixes($marc);
+
+                if (isset($marc["record"]["260"])) {
+                    if (isset($marc["record"]["260"]["c"])) {
+                        $excluir_caracteres = array("[","]","c");
+                        $only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+                        $body["doc"]["datePublished"] = $only_numbers;
+                    } else {
+                        $body["doc"]["datePublished"] = "N/D";
+                    }
+                }
+                $body["doc"]["base"][] = "E-Books";
+                $response = elasticsearch::elasticUpdate($id, $type, $body, "ebooks");
+
+            } else {
+
+                $body = fixes($marc);
+                if (isset($marc["record"]["260"])) {
+                    if (isset($marc["record"]["260"]["c"])) {
+                        $excluir_caracteres = array("[","]","c");
+                        $only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+                        $body["doc"]["datePublished"] = $only_numbers;
+                    } else {
+                        $body["doc"]["datePublished"] = "N/D";
+                    }
+                }
+                $body["doc"]["base"][] = "Livros";
+                $response = elasticsearch::elasticUpdate($id, $type, $body, "opac");
+                //print_r($id);
+                
+            }
+            break;
+        case 02:
+            echo "Não indexar";
+            break;
+        case 03:
+            $update["update"]["_index"] = $index;
+            $update["update"]["_type"] = $type;
+            $update["update"]["_id"] = $id;        
+            $body = fixes($marc);
+            $body["doc"]["base"][] = "Teses e dissertações";
+            $body["doc"]["sysno"] = $id;
+
+            $params['body'][] = $update;
+            $params['body'][] = $body; 
+            
+            if ($i % 250 == 0) {
+
+                $responses = $client->bulk($params);
+                //print_r($responses);
+        
+                // erase the old bulk request
+                $params = ['body' => []];
+        
+                // unset the bulk response when you are done to save memory
+                unset($responses);
+            } 
+            break; 
+            
+        case 04:
+            $update["update"]["_index"] = $index;
+            $update["update"]["_id"] = $id;
+            $body = fixes($marc);
+            $body["doc"]["base"][] = "Produção científica";
+            $body["doc"]["sysno"] = $id;
+
+            $params['body'][] = $update;
+            $params['body'][] = $body;
+
+            // if ($i % 250 == 0) {
+
+            //     $responses = $client->bulk($params);
+            //     print_r($responses);
+        
+            //     // erase the old bulk request
+            //     $params = ['body' => []];
+        
+            //     // unset the bulk response when you are done to save memory
+            //     unset($responses);
+            // }            
+
+            $response = elasticsearch::elasticUpdate($id, $body);
+            print_r($response);
+            break;
+        case 06:
+                $body = fixes($marc);
+                $body["doc"]["base"][] = "Trabalhos acadêmicos";
+                $body["doc"]["sysno"] = $id;
+                $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta");
+                break; 	            
+        default:
+            break;
+    }    
+
 }
 
 

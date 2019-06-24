@@ -13,7 +13,7 @@ while ($line = fgets(STDIN)) {
     $query["query"]["ids"]["values"][] = $id; // Cria a consulta para o ISSN
 
     if (!empty($id)) {
-        $get_existing = elasticsearch::elastic_search("qualis", null, null, $query, $index); // Consulta o ISSN na Indice
+        $get_existing = elasticsearch::elasticSearch("qualis", null, null, $query, $index); // Consulta o ISSN na Indice
         echo "\n";
         print_r($id);
         echo "\n";        
@@ -54,7 +54,7 @@ while ($line = fgets(STDIN)) {
     
         //print_r($body);
     
-        $response = elasticsearch::elastic_update($id, "qualis", $body, $index);
+        $response = elasticsearch::elasticUpdate($id, "qualis", $body, $index);
         //print_r($response);
     
         $array_area_nota = [];

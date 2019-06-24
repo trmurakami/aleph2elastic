@@ -35,7 +35,7 @@ function processaFixes ($marc,$id){
     unset($body["doc"]["BAS"]);
     $body["doc_as_upsert"] = true;
     print_r($body);
-    $response = elasticsearch::elastic_update($id, $type, $body);
+    $response = elasticsearch::elasticUpdate($id, $type, $body);
     print_r($response);
 }
 

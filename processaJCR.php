@@ -24,7 +24,7 @@ while( $line = fgets(STDIN) ) {
 echo "\n\n";
     print_r($body);
 
-    $response = elasticsearch::elastic_update($id, "JCR", $body);
+    $response = elasticsearch::elasticUpdate($id, "JCR", $body);
     print_r($response);
 
 
