@@ -60,14 +60,9 @@ function fixes($marc)
 {
 
     global $i;
-    global $tematresUrl;
+    //global $tematresUrl;
 
-    //print_r($marc);
     $body = [];
-
-    //if (isset($marc["record"]["001"])) {
-    //	print_r($marc["record"]["001"]["content"]);
-    //}
 
     if (isset($marc["record"]["020"]["a"])) {
         $body["doc"]["isbn"] = $marc["record"]["020"]["a"][0];
@@ -101,17 +96,13 @@ function fixes($marc)
             if (!empty($person["d"])) {
                 $author["person"]["date"] = $person["d"];
             }
-            // if (!empty($person["8"])) {
-            //     $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
-            //     if (!empty($resultadoTematres["found_term"])) {
-            //         $author["person"]["affiliation"]["name"] = $resultadoTematres["found_term"];
-            //         $author["person"]["affiliation"]["locationTematres"] = $resultadoTematres["country"];
-            //     } else {
-            //         $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["term_not_found"];
-            //     }
-            // }
+            if (!empty($person["8"])) {                
+                $author["person"]["affiliation"][0]["name"] = $person["8"];
+                $author["person"]["affiliation"][0]["locationTematres"] = "";
+                $author["person"]["affiliation"][0]["tematres"] = false;            
+            }
             if (!empty($person["9"])) {
-                $author["person"]["affiliation"]["location"] = $person["9"];
+                $author["person"]["affiliation"][0]["location"] = $person["9"];
             }
             if (!empty($potentialAction_correct)) {
                 $author["person"]["USP"]["autor_funcao"] = $person["a"] . " / " . $potentialAction_correct;
@@ -271,17 +262,13 @@ function fixes($marc)
             if (!empty($person["0"])) {
                 $author["person"]["orcid"] = $person["0"];
             }            
-            // if (!empty($person["8"])) {
-            //     $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
-            //     if (!empty($resultadoTematres["found_term"])) {
-            //         $author["person"]["affiliation"]["name"] = $resultadoTematres["found_term"];
-            //         $author["person"]["affiliation"]["locationTematres"] = $resultadoTematres["country"];
-            //     } else {
-            //         $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["term_not_found"];
-            //     }
-            // }
+            if (!empty($person["8"])) {
+                $author["person"]["affiliation"][0]["name"] = $person["8"];
+                $author["person"]["affiliation"][0]["locationTematres"] = "";
+                $author["person"]["affiliation"][0]["tematres"] = false;
+            }
             if (!empty($person["9"])) {
-                $author["person"]["affiliation"]["location"] = $person["9"];
+                $author["person"]["affiliation"][0]["location"] = $person["9"];
             }
             if (!empty($person["4"])) {
                 $potentialAction_correct = decode::potentialAction($person["4"]);
@@ -343,7 +330,8 @@ function fixes($marc)
         if (isset($marc["record"]["945"]["j"])) {
             $body["doc"]["datePublished"] = $marc["record"]["945"]["j"][0];
         }
-        $body["doc"]["type"] = $marc["record"]["945"]["b"][0];
+        $body["doc"]["type"] = decode::typeBDPI($marc["record"]["945"]["b"][0]);
+        $body["doc"]["original"]["type"] = $marc["record"]["945"]["b"][0];
 
         if (isset($marc["record"]["945"]["l"])) {
             $body["doc"]["USP"]["internacionalizacao"] = $marc["record"]["945"]["l"][0];
@@ -485,6 +473,74 @@ class decode
         break;
         }
     }
+
+    static function typeBDPI($material_type)
+    {
+        switch ($material_type) {
+        case "ARTIGO DE PERIODICO":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;
+        case "ARTIGO DE PERIODICO-DEP/ENTR":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;
+        case "ARTIGO DE PERIODICO-DIVULGACAO":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;
+        case "ARTIGO DE PERIODICO-CARTA/EDITORIAL":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;                                      
+        case "MONOGRAFIA/LIVRO":
+            return "Livros e Capítulos de Livros";
+            break;  
+        case "MONOGRAFIA/LIVRO-ED/ORG":
+            return "Livros e Capítulos de Livros";
+            break;
+        case "PARTE DE MONOGRAFIA/LIVRO":
+            return "Livros e Capítulos de Livros";
+            break;
+        case "PARTE DE MONOGRAFIA/LIVRO-APRES/PREF/POSF":
+            return "Livros e Capítulos de Livros";
+            break;
+        case "FOLHETO":
+            return "Livros e Capítulos de Livros";
+            break;                           
+        case "APRESENTACAO SONORA/CENICA/ENTREVISTA":
+            return "Outros";
+            break;
+        case "TRABALHO DE EVENTO-RESUMO":
+            return "Comunicações em Eventos";
+            break;
+        case "TRABALHO DE EVENTO-ANAIS PERIODICO":
+            return "Comunicações em Eventos";
+            break;            
+        case "TRABALHO DE EVENTO":
+            return "Comunicações em Eventos";
+            break;
+        case "TESE":
+            return "Teses e dissertações";
+            break;
+        case "ARTIGO DE JORNAL":
+            return "Outros";
+            break;            
+        case "ARTIGO DE JORNAL-DEP/ENTR":
+            return "Outros";
+        break;
+        case "EDITOR DE PERIODICO":
+            return "Outros";
+        break;                        
+        case "TEXTO NA WEB":
+            return "Outros";
+        break;
+        case "PROGRAMA DE COMPUTADOR":
+            return "Outros";
+        break;
+        case "WEBSITE":
+            return "Outros";
+        break;                 
+        default:
+            return $material_type;
+        }
+    }    
 
     /* Decodificar idioma */
     static function language($language)
@@ -1283,15 +1339,15 @@ function importToElastic($marc) {
             //     unset($responses);
             // }            
 
-            $response = elasticsearch::elasticUpdate($id, $body);
+            $response = elasticsearch::update($id, $body);
             print_r($response);
             break;
         case 06:
                 $body = fixes($marc);
                 $body["doc"]["base"][] = "Trabalhos acadêmicos";
                 $body["doc"]["sysno"] = $id;
-                $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta");
-                break; 	            
+                $response = elasticsearch::update($id, $type, $body, "bdta");
+                break; 
         default:
             break;
     }    
