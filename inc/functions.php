@@ -99,7 +99,7 @@ function fixes($marc)
             if (!empty($person["8"])) {                
                 $author["person"]["affiliation"][0]["name"] = $person["8"];
                 $author["person"]["affiliation"][0]["locationTematres"] = "";
-                $author["person"]["affiliation"][0]["tematres"] = false;            
+                $author["person"]["affiliation"][0]["tematres"] = "false";   
             }
             if (!empty($person["9"])) {
                 $author["person"]["affiliation"][0]["location"] = $person["9"];
@@ -187,13 +187,11 @@ function fixes($marc)
     if (isset($marc["record"]["536"])) {
         $i_funder = 0;
         foreach (($marc["record"]["536"]) as $funder) {
-            $resultado_tematres_funder = authorities::tematres($funder["a"], $tematresUrl);
-            if (!empty($resultado_tematres_funder["found_term"])) {
-                $body["doc"]["funder"][$i_funder]["name"] = $resultado_tematres_funder["found_term"];
-                $body["doc"]["funder"][$i_funder]["location"] = $resultado_tematres_funder["country"];
-            } else {
-                $body["doc"]["funder"][$i_funder]["name"] = $resultado_tematres_funder["term_not_found"];
-            }
+
+            $body["doc"]["funder"][$i_funder]["name"] = $funder["a"];
+            $body["doc"]["funder"][$i_funder]["location"] = "";
+            $body["doc"]["funder"][$i_funder]["tematres"] = "false";
+
             if (isset($funder["f"])) {
                 $body["doc"]["funder"][$i_funder]["projectNumber"][] = $funder["f"];
             }
@@ -265,7 +263,7 @@ function fixes($marc)
             if (!empty($person["8"])) {
                 $author["person"]["affiliation"][0]["name"] = $person["8"];
                 $author["person"]["affiliation"][0]["locationTematres"] = "";
-                $author["person"]["affiliation"][0]["tematres"] = false;
+                $author["person"]["affiliation"][0]["tematres"] = "false";
             }
             if (!empty($person["9"])) {
                 $author["person"]["affiliation"][0]["location"] = $person["9"];
@@ -480,6 +478,9 @@ class decode
         case "ARTIGO DE PERIODICO":
             return "Artigos e Materiais de Revistas Científicas";
             break;
+        case "ARTIGO DE PERIODICO-CARTA/EDITORIAL":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;            
         case "ARTIGO DE PERIODICO-DEP/ENTR":
             return "Artigos e Materiais de Revistas Científicas";
             break;
@@ -488,13 +489,19 @@ class decode
             break;
         case "ARTIGO DE PERIODICO-CARTA/EDITORIAL":
             return "Artigos e Materiais de Revistas Científicas";
-            break;                                      
+            break;
+        case "ARTIGO DE PERIODICO-RESENHA":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;                                                        
         case "MONOGRAFIA/LIVRO":
             return "Livros e Capítulos de Livros";
             break;  
         case "MONOGRAFIA/LIVRO-ED/ORG":
             return "Livros e Capítulos de Livros";
             break;
+        case "MONOGRAFIA/LIVRO-TRADUCAO":
+            return "Livros e Capítulos de Livros";
+            break;            
         case "PARTE DE MONOGRAFIA/LIVRO":
             return "Livros e Capítulos de Livros";
             break;
@@ -516,8 +523,11 @@ class decode
         case "TRABALHO DE EVENTO":
             return "Comunicações em Eventos";
             break;
+        case "TRABALHO DE EVENTO-RESUMO PERIODICO":
+            return "Comunicações em Eventos";
+            break;            
         case "TESE":
-            return "Teses e dissertações";
+            return "Teses e Dissertações";
             break;
         case "ARTIGO DE JORNAL":
             return "Outros";
@@ -527,13 +537,28 @@ class decode
         break;
         case "EDITOR DE PERIODICO":
             return "Outros";
-        break;                        
-        case "TEXTO NA WEB":
+        break;
+        case "MAQUETE/PROTOTIPO":
             return "Outros";
         break;
+        case "OUTROS":
+            return "Outros";
+        break;
+        case "PATENTE":
+            return "Outros";
+        break;
+        case "PRODUCAO ART E/OU MAT AUDIO-VISUAIS":
+            return "Outros";
+        break;                
         case "PROGRAMA DE COMPUTADOR":
             return "Outros";
         break;
+        case "RELATORIO TECNICO":
+            return "Outros";
+        break;
+        case "TEXTO NA WEB":
+            return "Outros";
+        break;                
         case "WEBSITE":
             return "Outros";
         break;                 
@@ -1295,7 +1320,6 @@ function importToElastic($marc) {
             break;
         case 03:
             $update["update"]["_index"] = $index;
-            $update["update"]["_type"] = $type;
             $update["update"]["_id"] = $id;        
             $body = fixes($marc);
             $body["doc"]["base"][] = "Teses e dissertações";
@@ -1304,17 +1328,19 @@ function importToElastic($marc) {
             $params['body'][] = $update;
             $params['body'][] = $body; 
             
-            if ($i % 250 == 0) {
+            // if ($i % 250 == 0) {
 
-                $responses = $client->bulk($params);
-                //print_r($responses);
+            //     $responses = $client->bulk($params);
+            //     //print_r($responses);
         
-                // erase the old bulk request
-                $params = ['body' => []];
+            //     // erase the old bulk request
+            //     $params = ['body' => []];
         
-                // unset the bulk response when you are done to save memory
-                unset($responses);
-            } 
+            //     // unset the bulk response when you are done to save memory
+            //     unset($responses);
+            // }
+            
+            $response = elasticsearch::update($id, $body);
             break; 
             
         case 04:
