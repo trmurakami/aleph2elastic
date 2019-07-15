@@ -646,6 +646,9 @@ class decode
         case "slo":
             return "Eslovaco";
             break;
+        case "zxx":
+            return "Sem conteúdo linguístico";
+            break;            
         default:
             return $language;
         }
