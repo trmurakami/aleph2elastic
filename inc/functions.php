@@ -423,11 +423,37 @@ function fixes($marc)
             $body["doc"]["authorUSP"][] = $authorUSPGrad_array;
             if (isset($authorUSPGrad["e"])) {
                 $body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSPGrad["e"]);
-            } else {
-                $body["doc"]["unidadeUSP"] = [];
-            }
+            } 
         }
-    }    
+    } 
+    
+    if (isset($marc["record"]["961"])) {        
+        foreach (($marc["record"]["961"]) as $authorUSPPos) {
+            $authorUSPPos_array["name"] = $authorUSPPos["a"];
+            if (isset($authorUSPPos["b"])) {
+                $authorUSPPos_array["codpes"] = (string)((int)$authorUSPPos["b"]);
+            }
+            if (isset($authorUSPPos["e"])) {
+                $authorUSPPos_array["unidadeUSP"] = decode::unidadeAntiga($authorUSPPos["e"]);
+            }
+            if (isset($authorUSPPos["x"])) {
+                $authorUSPPos_array["nomeCurso"] = $authorUSPPos["x"];
+            }            
+            if (isset($authorUSPPos["j"])) {
+                $authorUSPPos_array["tipoCurso"] = $authorUSPPos["j"];
+            }
+            if (isset($authorUSPPos["q"])) {
+                $authorUSPPos_array["grauAcademico"] = $authorUSPPos["q"];
+            }            
+            if (isset($authorUSPPos["z"])) {
+                $authorUSPPos_array["areaDeConcentracao"] = $authorUSPPos["z"];
+            }            
+            $body["doc"]["authorUSP"][] = $authorUSPPos_array;
+            if (isset($authorUSPPos["e"])) {
+                $body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSPPos["e"]);
+            } 
+        }
+    }     
 
     if (isset($marc["record"]["CAT"])) {
         foreach ($marc["record"]["CAT"] as $CAT) {
