@@ -385,9 +385,7 @@ function fixes($marc)
             $body["doc"]["authorUSP"][] = $authorUSP_array;
             if (isset($authorUSP["e"])) {
                 $body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSP["e"]);
-            } else {
-                $body["doc"]["unidadeUSP"] = [];
-            }
+            } 
             if (isset($authorUSP["o"])) {
                 $body["doc"]["USP"]["codpesOrientador"][] = $authorUSP["o"];
             }
@@ -453,7 +451,13 @@ function fixes($marc)
                 $body["doc"]["unidadeUSP"][] = decode::unidadeAntiga($authorUSPPos["e"]);
             } 
         }
-    }     
+    }
+    
+    if (!isset($body["doc"]["unidadeUSP"])) {
+        $body["doc"]["unidadeUSP"]=[];
+    }
+
+    $body["doc"]["unidadeUSP"] = array_unique($body["doc"]["unidadeUSP"]);
 
     if (isset($marc["record"]["CAT"])) {
         foreach ($marc["record"]["CAT"] as $CAT) {
