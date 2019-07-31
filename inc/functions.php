@@ -457,7 +457,7 @@ function fixes($marc)
         $body["doc"]["unidadeUSP"]=[];
     }
 
-    $body["doc"]["unidadeUSP"] = array_unique($body["doc"]["unidadeUSP"]);
+    //$body["doc"]["unidadeUSP"] = array_unique($body["doc"]["unidadeUSP"]);
 
     if (isset($marc["record"]["CAT"])) {
         foreach ($marc["record"]["CAT"] as $CAT) {

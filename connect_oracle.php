@@ -168,6 +168,7 @@ while (($row = oci_fetch_array($stid, OCI_ASSOC+OCI_RETURN_NULLS)) != false) {
 			}			
 			print_r($result_delete);
 		} else {
+			print_r($id);
 			processaFixes($marc, $id);
 		}
 		$marc = [];        
