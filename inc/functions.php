@@ -145,6 +145,9 @@ function fixes($marc)
         } else {
             $body["doc"]["name"] = $marc["record"]["245"]["a"][0];
         }
+        if (isset($marc["record"]["245"]["p"][0])) {
+            $body["doc"]["nameOfpart"] = $marc["record"]["245"]["p"][0];
+        }        
 
     }
 
