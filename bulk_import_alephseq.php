@@ -1,7 +1,6 @@
 #!/usr/bin/php
 <?php
 
-require 'inc/config.php';
 require 'inc/functions.php';
 
 $record = array();
@@ -23,9 +22,9 @@ while ($line = fgets(STDIN)) {
 
         /* Processa os fixes */
 
-        importToElastic($marc);
-    
         echo "$sysno \n";
+
+        importToElastic($marc);
             
         $marc = [];
         $record = [];

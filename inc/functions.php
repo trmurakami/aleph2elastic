@@ -1,6 +1,6 @@
 <?php
 
-require 'inc/config.php';
+require 'config.php';
 require 'elasticfind/elasticfind.php';
 
 /*
@@ -1347,6 +1347,7 @@ function importToElastic($marc) {
                     }
                 }
                 $body["doc"]["base"][] = "Livros";
+                //print_r($body);
                 $response = Elasticsearch::update($id, $body);
                 //print_r($id);
                 
