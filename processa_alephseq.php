@@ -36,8 +36,9 @@ case 01:
                 $body["doc"]["datePublished"] = "N/D";
             }
         }
-        $body["doc"]["base"][] = "Livros";
-        $response = elasticsearch::elasticUpdate($id, "producao", $body, "partituras");
+        $body["doc"]["base"][] = "Partituras";
+        $response = Elasticsearch::update($id, $body);
+        $response = Elasticsearch::update($id, $body, "acorde");
 
     } elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE CONCLUSAO DE CURSO - TCC") {
         $body = fixes($marc);
@@ -53,7 +54,7 @@ case 01:
             }
 
         }
-        $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta_homologacao");
+        $response = Elasticsearch::update($id, $body);
 
     } elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE ESPECIALIZACAO - TCE") {
 
@@ -70,7 +71,7 @@ case 01:
             }
 
         }
-        $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta_homologacao");
+        $response = Elasticsearch::update($id, $body);
 
     } elseif ($marc["record"]["945"]["b"][0] == "E-BOOK") {
 
@@ -86,7 +87,7 @@ case 01:
 
         }
         $body["doc"]["base"][] = "E-Books";
-        $response = elasticsearch::elasticUpdate($id, $type, $body, "ebooks");
+        $response = Elasticsearch::update($id, $body);
 
     } else {
 
@@ -101,7 +102,7 @@ case 01:
             }
         }
         $body["doc"]["base"][] = "Livros";
-        $response = elasticsearch::elasticUpdate($id, $type, $body, "opac");
+        $response = Elasticsearch::update($id, $body);
 
     }
     break;
@@ -112,23 +113,23 @@ case 03:
     $body = fixes($marc);
     $body["doc"]["base"][] = "Teses e dissertações";
     $body["doc"]["sysno"] = $id;
-    $response = elasticsearch::elasticUpdate($id, $type, $body);
+    $response = Elasticsearch::update($id, $body);
     break;
 case 04:
     $body = fixes($marc);
     $body["doc"]["base"][] = "Produção científica";
     $body["doc"]["sysno"] = $id;
-    $response = elasticsearch::elasticUpdate($id, $type, $body);
+    $response = Elasticsearch::update($id, $body);
     break;
 case 06:
     $body = fixes($marc);
     $body["doc"]["base"][] = "Trabalhos acadêmicos";
     $body["doc"]["sysno"] = $id;
-    $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta");
+    $response = Elasticsearch::update($id, $body);
     break;  
 default:
     $body = fixes($marc);
     $body["doc"]["base"][] = $marc["record"]["BAS"]["a"][0];
     $body["doc"]["sysno"] = $id;
-    $response = elasticsearch::elasticUpdate($id, $type, $body);
+    $response = Elasticsearch::update($id, $body);
 }
