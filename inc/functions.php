@@ -1,8 +1,7 @@
 <?php
 
-require 'elasticfind/elasticfind.php';
 require 'inc/config.php';
-
+require 'elasticfind/elasticfind.php';
 
 /*
 * Converte Alephseq em JSON *
