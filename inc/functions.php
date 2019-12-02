@@ -1,6 +1,6 @@
 <?php
 
-require 'uspfind_core/uspfind_core.php';
+require 'elasticfind/elasticfind.php';
 require 'inc/config.php';
 
 
