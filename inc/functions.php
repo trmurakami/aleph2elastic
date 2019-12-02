@@ -1280,7 +1280,8 @@ function importToElastic($marc) {
                     }
                 }
                 $body["doc"]["base"][] = "Partituras";
-                $response = elasticsearch::elasticUpdate($id, "producao", $body, "acorde");
+                $response = Elasticsearch::update($id, $body);
+                $response = Elasticsearch::update($id, $body, "acorde");
                 //print_r($id);				
 
             } elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE CONCLUSAO DE CURSO - TCC") {
@@ -1298,7 +1299,7 @@ function importToElastic($marc) {
                     }
                         
                 }
-                $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta_homologacao");
+                $response = Elasticsearch::update($id, $body);
                 //print_r($id);
 
             } elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE ESPECIALIZACAO - TCE") {
@@ -1315,7 +1316,7 @@ function importToElastic($marc) {
                         $body["doc"]["datePublished"] = "N/D";
                     }                        
                 }
-                $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta_homologacao");
+                $response = Elasticsearch::update($id, $body);
                 //print_r($id);
 
             } elseif ($marc["record"]["945"]["b"][0] == "E-BOOK") {
@@ -1332,7 +1333,7 @@ function importToElastic($marc) {
                     }
                 }
                 $body["doc"]["base"][] = "E-Books";
-                $response = elasticsearch::elasticUpdate($id, $type, $body, "ebooks");
+                $response = Elasticsearch::update($id, $body);
 
             } else {
 
@@ -1347,7 +1348,7 @@ function importToElastic($marc) {
                     }
                 }
                 $body["doc"]["base"][] = "Livros";
-                $response = elasticsearch::elasticUpdate($id, $type, $body, "opac");
+                $response = Elasticsearch::update($id, $body);
                 //print_r($id);
                 
             }
@@ -1377,7 +1378,7 @@ function importToElastic($marc) {
             //     unset($responses);
             // }
             
-            $response = elasticsearch::update($id, $body);
+            $response = Elasticsearch::update($id, $body);
             break; 
             
         case 04:
@@ -1402,14 +1403,14 @@ function importToElastic($marc) {
             //     unset($responses);
             // }            
 
-            $response = elasticsearch::update($id, $body);
+            $response = Elasticsearch::update($id, $body);
             print_r($response);
             break;
         case 06:
                 $body = fixes($marc);
                 $body["doc"]["base"][] = "Trabalhos acadêmicos";
                 $body["doc"]["sysno"] = $id;
-                $response = elasticsearch::update($id, $type, $body, "bdta");
+                $response = Elasticsearch::update($id, $body);
                 break; 
         default:
             break;
