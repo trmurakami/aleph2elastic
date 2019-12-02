@@ -22,7 +22,7 @@ while( $line = fgets(STDIN) ) {
     }
     $body["doc_as_upsert"] = true;
 
-    $response = elasticsearch::elastic_update($id, "WOS", $body);
+    $response = elasticsearch::elasticUpdate($id, "WOS", $body);
 
 
     $body = [];            

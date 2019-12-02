@@ -1,6 +1,6 @@
 <?php
 
-require 'functions_core/functions_core.php';
+require 'uspfind_core/uspfind_core.php';
 require 'inc/config.php';
 
 
@@ -60,14 +60,9 @@ function fixes($marc)
 {
 
     global $i;
-    global $tematresUrl;
+    //global $tematresUrl;
 
-    //print_r($marc);
     $body = [];
-
-    //if (isset($marc["record"]["001"])) {
-    //	print_r($marc["record"]["001"]["content"]);
-    //}
 
     if (isset($marc["record"]["020"]["a"])) {
         $body["doc"]["isbn"] = $marc["record"]["020"]["a"][0];
@@ -101,17 +96,13 @@ function fixes($marc)
             if (!empty($person["d"])) {
                 $author["person"]["date"] = $person["d"];
             }
-            if (!empty($person["8"])) {
-                $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
-                if (!empty($resultadoTematres["found_term"])) {
-                    $author["person"]["affiliation"]["name"] = $resultadoTematres["found_term"];
-                    $author["person"]["affiliation"]["locationTematres"] = $resultadoTematres["country"];
-                } else {
-                    $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["term_not_found"];
-                }
+            if (!empty($person["8"])) {                
+                $author["person"]["affiliation"][0]["name"] = $person["8"];
+                $author["person"]["affiliation"][0]["locationTematres"] = "";
+                $author["person"]["affiliation"][0]["tematres"] = "false";   
             }
             if (!empty($person["9"])) {
-                $author["person"]["affiliation"]["location"] = $person["9"];
+                $author["person"]["affiliation"][0]["location"] = $person["9"];
             }
             if (!empty($potentialAction_correct)) {
                 $author["person"]["USP"]["autor_funcao"] = $person["a"] . " / " . $potentialAction_correct;
@@ -200,13 +191,11 @@ function fixes($marc)
     if (isset($marc["record"]["536"])) {
         $i_funder = 0;
         foreach (($marc["record"]["536"]) as $funder) {
-            $resultado_tematres_funder = authorities::tematres($funder["a"], $tematresUrl);
-            if (!empty($resultado_tematres_funder["found_term"])) {
-                $body["doc"]["funder"][$i_funder]["name"] = $resultado_tematres_funder["found_term"];
-                $body["doc"]["funder"][$i_funder]["location"] = $resultado_tematres_funder["country"];
-            } else {
-                $body["doc"]["funder"][$i_funder]["name"] = $resultado_tematres_funder["term_not_found"];
-            }
+
+            $body["doc"]["funder"][$i_funder]["name"] = $funder["a"];
+            $body["doc"]["funder"][$i_funder]["location"] = "";
+            $body["doc"]["funder"][$i_funder]["tematres"] = "false";
+
             if (isset($funder["f"])) {
                 $body["doc"]["funder"][$i_funder]["projectNumber"][] = $funder["f"];
             }
@@ -276,16 +265,12 @@ function fixes($marc)
                 $author["person"]["orcid"] = $person["0"];
             }            
             if (!empty($person["8"])) {
-                $resultadoTematres = authorities::tematres(trim($person["8"]), $tematresUrl);
-                if (!empty($resultadoTematres["found_term"])) {
-                    $author["person"]["affiliation"]["name"] = $resultadoTematres["found_term"];
-                    $author["person"]["affiliation"]["locationTematres"] = $resultadoTematres["country"];
-                } else {
-                    $author["person"]["affiliation"]["name_not_found"] = $resultadoTematres["term_not_found"];
-                }
+                $author["person"]["affiliation"][0]["name"] = $person["8"];
+                $author["person"]["affiliation"][0]["locationTematres"] = "";
+                $author["person"]["affiliation"][0]["tematres"] = "false";
             }
             if (!empty($person["9"])) {
-                $author["person"]["affiliation"]["location"] = $person["9"];
+                $author["person"]["affiliation"][0]["location"] = $person["9"];
             }
             if (!empty($person["4"])) {
                 $potentialAction_correct = decode::potentialAction($person["4"]);
@@ -306,15 +291,15 @@ function fixes($marc)
     }
 
     if (isset($marc["record"]["773"])) {
-        if (isset($marc["record"]["773"]["t"])) {
-            $resultadoTematresPeriodicos = authorities::tematres(trim($marc["record"]["773"]["t"][0]), $tematresUrl);
-            if (!empty($resultadoTematresPeriodicos["found_term"])) {
-                $body["doc"]["isPartOf"]["name"] = $resultadoTematresPeriodicos["found_term"];
-                $body["doc"]["isPartOf"]["tematresOK"] = true;
-            } else {
-                $body["doc"]["isPartOf"]["name"] = $resultadoTematresPeriodicos["term_not_found"];
-            }            
-        }
+        // if (isset($marc["record"]["773"]["t"])) {
+        //     $resultadoTematresPeriodicos = authorities::tematres(trim($marc["record"]["773"]["t"][0]), $tematresUrl);
+        //     if (!empty($resultadoTematresPeriodicos["found_term"])) {
+        //         $body["doc"]["isPartOf"]["name"] = $resultadoTematresPeriodicos["found_term"];
+        //         $body["doc"]["isPartOf"]["tematresOK"] = true;
+        //     } else {
+        //         $body["doc"]["isPartOf"]["name"] = $resultadoTematresPeriodicos["term_not_found"];
+        //     }            
+        // }
         if (isset($marc["record"]["773"]["h"])) {
             $body["doc"]["isPartOf"]["USP"]["dados_do_periodico"] = $marc["record"]["773"]["h"][0];
         }
@@ -347,7 +332,8 @@ function fixes($marc)
         if (isset($marc["record"]["945"]["j"])) {
             $body["doc"]["datePublished"] = $marc["record"]["945"]["j"][0];
         }
-        $body["doc"]["type"] = $marc["record"]["945"]["b"][0];
+        $body["doc"]["type"] = decode::typeBDPI($marc["record"]["945"]["b"][0]);
+        $body["doc"]["original"]["type"] = $marc["record"]["945"]["b"][0];
 
         if (isset($marc["record"]["945"]["l"])) {
             $body["doc"]["USP"]["internacionalizacao"] = $marc["record"]["945"]["l"][0];
@@ -520,6 +506,101 @@ class decode
         }
     }
 
+    static function typeBDPI($material_type)
+    {
+        switch ($material_type) {
+        case "ARTIGO DE PERIODICO":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;
+        case "ARTIGO DE PERIODICO-CARTA/EDITORIAL":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;            
+        case "ARTIGO DE PERIODICO-DEP/ENTR":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;
+        case "ARTIGO DE PERIODICO-DIVULGACAO":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;
+        case "ARTIGO DE PERIODICO-CARTA/EDITORIAL":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;
+        case "ARTIGO DE PERIODICO-RESENHA":
+            return "Artigos e Materiais de Revistas Científicas";
+            break;                                                        
+        case "MONOGRAFIA/LIVRO":
+            return "Livros e Capítulos de Livros";
+            break;  
+        case "MONOGRAFIA/LIVRO-ED/ORG":
+            return "Livros e Capítulos de Livros";
+            break;
+        case "MONOGRAFIA/LIVRO-TRADUCAO":
+            return "Livros e Capítulos de Livros";
+            break;            
+        case "PARTE DE MONOGRAFIA/LIVRO":
+            return "Livros e Capítulos de Livros";
+            break;
+        case "PARTE DE MONOGRAFIA/LIVRO-APRES/PREF/POSF":
+            return "Livros e Capítulos de Livros";
+            break;
+        case "FOLHETO":
+            return "Livros e Capítulos de Livros";
+            break;                           
+        case "APRESENTACAO SONORA/CENICA/ENTREVISTA":
+            return "Outros";
+            break;
+        case "TRABALHO DE EVENTO-RESUMO":
+            return "Comunicações em Eventos";
+            break;
+        case "TRABALHO DE EVENTO-ANAIS PERIODICO":
+            return "Comunicações em Eventos";
+            break;            
+        case "TRABALHO DE EVENTO":
+            return "Comunicações em Eventos";
+            break;
+        case "TRABALHO DE EVENTO-RESUMO PERIODICO":
+            return "Comunicações em Eventos";
+            break;            
+        case "TESE":
+            return "Teses e Dissertações";
+            break;
+        case "ARTIGO DE JORNAL":
+            return "Outros";
+            break;            
+        case "ARTIGO DE JORNAL-DEP/ENTR":
+            return "Outros";
+        break;
+        case "EDITOR DE PERIODICO":
+            return "Outros";
+        break;
+        case "MAQUETE/PROTOTIPO":
+            return "Outros";
+        break;
+        case "OUTROS":
+            return "Outros";
+        break;
+        case "PATENTE":
+            return "Outros";
+        break;
+        case "PRODUCAO ART E/OU MAT AUDIO-VISUAIS":
+            return "Outros";
+        break;                
+        case "PROGRAMA DE COMPUTADOR":
+            return "Outros";
+        break;
+        case "RELATORIO TECNICO":
+            return "Outros";
+        break;
+        case "TEXTO NA WEB":
+            return "Outros";
+        break;                
+        case "WEBSITE":
+            return "Outros";
+        break;                 
+        default:
+            return $material_type;
+        }
+    }    
+
     /* Decodificar idioma */
     static function language($language)
     {
@@ -599,6 +680,9 @@ class decode
         case "slo":
             return "Eslovaco";
             break;
+        case "zxx":
+            return "Sem conteúdo linguístico";
+            break;            
         default:
             return $language;
         }
@@ -1168,6 +1252,169 @@ function oracle_sysno($sysno)
             $record[] = implode(" ", $row);
     }
     return $record;
+}
+
+function importToElastic($marc) {
+
+    global $index;
+    global $id;
+
+    switch ($marc["record"]["BAS"]["a"][0]) {
+        case "Catalogação Rápida":
+            echo "Não indexar";
+            break;
+        case "Assinatura Combinada":
+            echo "Não indexar";
+            break;
+        case 01:        
+            if ($marc["record"]["945"]["b"][0] == "PARTITURA") {
+
+                $body = fixes($marc);
+                if (isset($marc["record"]["260"])) {
+                    if (isset($marc["record"]["260"]["c"])) {
+                        $excluir_caracteres = array("[","]","c");
+                        $only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+                        $body["doc"]["datePublished"] = $only_numbers;
+                    } else {
+                        $body["doc"]["datePublished"] = "N/D";
+                    }
+                }
+                $body["doc"]["base"][] = "Partituras";
+                $response = elasticsearch::elasticUpdate($id, "producao", $body, "acorde");
+                //print_r($id);				
+
+            } elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE CONCLUSAO DE CURSO - TCC") {
+
+                $body = fixes($marc);
+                $body["doc"]["base"][] = "Trabalhos acadêmicos";
+                $body["doc"]["sysno"] = $id;
+                if (isset($marc["record"]["260"])) {
+                    if (isset($marc["record"]["260"]["c"])) {
+                        $excluir_caracteres = array("[","]","c");
+                        $only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+                        $body["doc"]["datePublished"] = $only_numbers;
+                    } else {
+                        $body["doc"]["datePublished"] = "N/D";
+                    }
+                        
+                }
+                $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta_homologacao");
+                //print_r($id);
+
+            } elseif ($marc["record"]["945"]["b"][0] == "TRABALHO DE ESPECIALIZACAO - TCE") {
+
+                $body = fixes($marc);
+                $body["doc"]["base"][] = "Trabalhos acadêmicos";
+                $body["doc"]["sysno"] = $id;
+                if (isset($marc["record"]["260"])) {
+                    if (isset($marc["record"]["260"]["c"])) {
+                        $excluir_caracteres = array("[","]","c");
+                        $only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+                        $body["doc"]["datePublished"] = $only_numbers;
+                    } else {
+                        $body["doc"]["datePublished"] = "N/D";
+                    }                        
+                }
+                $response = elasticsearch::elasticUpdate($id, $type, $body, "bdta_homologacao");
+                //print_r($id);
+
+            } elseif ($marc["record"]["945"]["b"][0] == "E-BOOK") {
+
+                $body = fixes($marc);
+
+                if (isset($marc["record"]["260"])) {
+                    if (isset($marc["record"]["260"]["c"])) {
+                        $excluir_caracteres = array("[","]","c");
+                        $only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+                        $body["doc"]["datePublished"] = $only_numbers;
+                    } else {
+                        $body["doc"]["datePublished"] = "N/D";
+                    }
+                }
+                $body["doc"]["base"][] = "E-Books";
+                $response = elasticsearch::elasticUpdate($id, $type, $body, "ebooks");
+
+            } else {
+
+                $body = fixes($marc);
+                if (isset($marc["record"]["260"])) {
+                    if (isset($marc["record"]["260"]["c"])) {
+                        $excluir_caracteres = array("[","]","c");
+                        $only_numbers = str_replace($excluir_caracteres, "", $marc["record"]["260"]["c"][0]);
+                        $body["doc"]["datePublished"] = $only_numbers;
+                    } else {
+                        $body["doc"]["datePublished"] = "N/D";
+                    }
+                }
+                $body["doc"]["base"][] = "Livros";
+                $response = elasticsearch::elasticUpdate($id, $type, $body, "opac");
+                //print_r($id);
+                
+            }
+            break;
+        case 02:
+            echo "Não indexar";
+            break;
+        case 03:
+            $update["update"]["_index"] = $index;
+            $update["update"]["_id"] = $id;        
+            $body = fixes($marc);
+            $body["doc"]["base"][] = "Teses e dissertações";
+            $body["doc"]["sysno"] = $id;
+
+            $params['body'][] = $update;
+            $params['body'][] = $body; 
+            
+            // if ($i % 250 == 0) {
+
+            //     $responses = $client->bulk($params);
+            //     //print_r($responses);
+        
+            //     // erase the old bulk request
+            //     $params = ['body' => []];
+        
+            //     // unset the bulk response when you are done to save memory
+            //     unset($responses);
+            // }
+            
+            $response = elasticsearch::update($id, $body);
+            break; 
+            
+        case 04:
+            $update["update"]["_index"] = $index;
+            $update["update"]["_id"] = $id;
+            $body = fixes($marc);
+            $body["doc"]["base"][] = "Produção científica";
+            $body["doc"]["sysno"] = $id;
+
+            $params['body'][] = $update;
+            $params['body'][] = $body;
+
+            // if ($i % 250 == 0) {
+
+            //     $responses = $client->bulk($params);
+            //     print_r($responses);
+        
+            //     // erase the old bulk request
+            //     $params = ['body' => []];
+        
+            //     // unset the bulk response when you are done to save memory
+            //     unset($responses);
+            // }            
+
+            $response = elasticsearch::update($id, $body);
+            print_r($response);
+            break;
+        case 06:
+                $body = fixes($marc);
+                $body["doc"]["base"][] = "Trabalhos acadêmicos";
+                $body["doc"]["sysno"] = $id;
+                $response = elasticsearch::update($id, $type, $body, "bdta");
+                break; 
+        default:
+            break;
+    }    
+
 }
 
 

@@ -10,7 +10,7 @@ if ($handle) {
         // process the line read.
         $item = explode("\t", $line);
         $body_id["query"]["terms"]["_id"][] = $item[0];
-        $exists_test = elasticsearch::elastic_search($type, "item", null, $body_id);
+        $exists_test = elasticsearch::elasticSearch($type, "item", null, $body_id);
         if ($exists_test["hits"]["total"] == 1) {            
             if (!empty($exists_test["hits"]["hits"][0]["_source"]["item"])) {
                 foreach ($exists_test["hits"]["hits"][0]["_source"]["item"] as $existingItens) {
@@ -41,7 +41,7 @@ if ($handle) {
             $body["doc"]["itemCollect"] = true;
             $body["doc"]["itemCollectDate"] = date("Ymd");
             $body["doc_as_upsert"] = true;
-            $response = elasticsearch::elastic_update($item[0], $type, $body);
+            $response = elasticsearch::elasticUpdate($item[0], $type, $body);
             print_r($response);
         }
         unset($body_id);

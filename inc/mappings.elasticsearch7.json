@@ -23,7 +23,7 @@ PUT /bdpi
       "analyzer": {
         "portuguese": {
           "tokenizer": "standard",
-          "filter":  [ "standard", "lowercase", "my_ascii_folding","portuguese_stop","portuguese_stemmer"]
+          "filter":  [ "lowercase", "my_ascii_folding","portuguese_stop","portuguese_stemmer"]
         }
       }
     }

@@ -25,7 +25,7 @@ if (isset($marc["doc"]["BAS"])) {
             $body = $marc;
             unset($body["doc"]["BAS"]);
             $body["doc_as_upsert"] = true;
-            $response = elasticsearch::elastic_update($id,$type,$body,"opac");
+            $response = elasticsearch::elasticUpdate($id,$type,$body,"opac");
             print_r($response);
 			break;
 		case 02:
@@ -35,14 +35,14 @@ if (isset($marc["doc"]["BAS"])) {
             $body = $marc;
             unset($body["doc"]["BAS"]);
             $body["doc_as_upsert"] = true;
-            $response = elasticsearch::elastic_update($id,$type,$body);
+            $response = elasticsearch::elasticUpdate($id,$type,$body);
             print_r($response);
 			break;
 		case 04:
             $body = $marc;
             unset($body["doc"]["BAS"]);
             $body["doc_as_upsert"] = true;
-            $response = elasticsearch::elastic_update($id,$type,$body);
+            $response = elasticsearch::elasticUpdate($id,$type,$body);
             print_r($response);
 			break;
 		default:
