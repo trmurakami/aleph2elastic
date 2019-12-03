@@ -115,8 +115,10 @@ function fixes($marc)
     }
 
     if (isset($marc["record"]["110"])) {
-        $author["person"]["name"] = $marc["record"]["110"]["a"][0];
-        $body["doc"]["author"][] = $author;
+        if (isset($marc["record"]["110"]["a"])) {
+            $author["person"]["name"] = $marc["record"]["110"]["a"][0];
+            $body["doc"]["author"][] = $author;
+        }
         unset($corporateName);
         unset($author);
     }    
