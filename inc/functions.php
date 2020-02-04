@@ -239,7 +239,9 @@ function fixes($marc)
     if (isset($marc["record"]["650"])) {
         foreach (($marc["record"]["650"]) as $subject) {
             if (isset($subject["a"])) {
-                $body["doc"]["about"][] = $subject["a"];
+                if (mb_strtoupper($subject["a"])===$subject["a"]) {
+                    $body["doc"]["about"][] = $subject["a"];
+                }  
             }
         }
     }
