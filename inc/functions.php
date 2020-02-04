@@ -248,13 +248,19 @@ function fixes($marc)
 
     if (isset($marc["record"]["651"])) {
         foreach (($marc["record"]["651"]) as $subject) {
-            $body["doc"]["about"][] = $subject["a"];
+            if (isset($subject["a"])) {
+                if (mb_strtoupper($subject["a"])===$subject["a"]) {
+                    $body["doc"]["about"][] = $subject["a"];
+                }  
+            }            
         }
     }
 
     if (isset($marc["record"]["655"])) {
         foreach ($marc["record"]["655"] as $genero_e_forma) {
-            $body["doc"]["USP"]["about"]["genero_e_forma"][] = $genero_e_forma["a"];
+            if (mb_strtoupper($genero_e_forma["a"])===$genero_e_forma["a"]) {
+                $body["doc"]["USP"]["about"]["genero_e_forma"][] = $genero_e_forma["a"];
+            }            
         }
     }
 
